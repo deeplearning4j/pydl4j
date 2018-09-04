@@ -19,7 +19,6 @@ mvn4py.install(group='datavec', artifact='datavec-api')
 # Or fetch a specific version:
 mvn4py.install(group='datavec', artifact='datavec-api', version='1.0.0-beta')
 
-
 jnius_config.set_classpath(mvn4py.get_dir())
 ```
 
