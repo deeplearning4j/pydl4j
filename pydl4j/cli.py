@@ -34,16 +34,16 @@ class CLI(object):
         self.command = None
 
     def command_dispatcher(self, args=None):
-        desc = ('mvn4py,  a system to manage your DL4J dependencies from Python.\n')
+        desc = ('pydl4j,  a system to manage your DL4J dependencies from Python.\n')
         parser = argparse.ArgumentParser(description=desc)
         parser.add_argument(
             '-v', '--version', action='version',
-            version=pkg_resources.get_distribution("mvn4py").version,
-            help='Print mvn4py version'
+            version=pkg_resources.get_distribution("pydl4j").version,
+            help='Print pydl4j version'
         )
 
         subparsers = parser.add_subparsers(title='subcommands', dest='command')
-        subparsers.add_parser('init', help='Initialize mvn4py')
+        subparsers.add_parser('init', help='Initialize pydl4j')
 
         argcomplete.autocomplete(parser)
         args = parser.parse_args(args)
@@ -61,19 +61,19 @@ class CLI(object):
 
   
 
-    def init(self, settings_file="mvn4py.json"):
+    def init(self, settings_file="pydl4j.json"):
 
         if os.path.isfile(settings_file):
             raise ClickException("This project already has a " + click.style("{0!s} file".format(settings_file), fg="red", bold=True) + "!")
 
-        click.echo(click.style(u"""\n███╗   ███╗██╗   ██╗███╗   ██╗██╗  ██╗██████╗ ██╗   ██╗
-████╗ ████║██║   ██║████╗  ██║██║  ██║██╔══██╗╚██╗ ██╔╝
-██╔████╔██║██║   ██║██╔██╗ ██║███████║██████╔╝ ╚████╔╝ 
-██║╚██╔╝██║╚██╗ ██╔╝██║╚██╗██║╚════██║██╔═══╝   ╚██╔╝  
-██║ ╚═╝ ██║ ╚████╔╝ ██║ ╚████║     ██║██║        ██║   
-╚═╝     ╚═╝  ╚═══╝  ╚═╝  ╚═══╝     ╚═╝╚═╝        ╚═╝\n""", fg='blue', bold=True))
+        click.echo(click.style(u"""\n██████╗ ██╗   ██╗██████╗ ██╗██╗  ██╗     ██╗
+██╔══██╗╚██╗ ██╔╝██╔══██╗██║██║  ██║     ██║
+██████╔╝ ╚████╔╝ ██║  ██║██║███████║     ██║
+██╔═══╝   ╚██╔╝  ██║  ██║██║╚════██║██   ██║
+██║        ██║   ██████╔╝███████╗██║╚█████╔╝
+╚═╝        ╚═╝   ╚═════╝ ╚══════╝╚═╝ ╚════╝ \n""", fg='blue', bold=True))
 
-        click.echo(click.style("mvn4py", bold=True) + " is a system to manage your DL4J dependencies from Python!\n")
+        click.echo(click.style("pydl4j", bold=True) + " is a system to manage your DL4J dependencies from Python!\n")
 
         # DL4J version
         dl4j_version = input("Which DL4J version do you want to use for your Python projects? (default '%s'): " % DEFAULT_DL4J_VERSION) or DEFAULT_DL4J_VERSION
@@ -106,7 +106,7 @@ class CLI(object):
             scala_version = input("Which Scala version would you like to use? (default '%s'): " % DEFAULT_SCALA_VERSION) or DEFAULT_SCALA_VERSION
 
 
-        mvn4py_settings = {
+        pydl4j_settings = {
                 'dl4j_version': dl4j_version,
                 'backend': backend,
                 'dl4j_core': dl4j_core,
@@ -116,29 +116,29 @@ class CLI(object):
                 'scala_version': scala_version
         }
 
-        mvn4py_json = json.dumps(mvn4py_settings, sort_keys=False, indent=2)
+        pydl4j_json = json.dumps(pydl4j_settings, sort_keys=False, indent=2)
 
-        click.echo("\nThis is your current settings file " + click.style("mvn4py_settings.json", bold=True) + ":\n")
-        click.echo(click.style(mvn4py_json, fg="green", bold=True))
+        click.echo("\nThis is your current settings file " + click.style("pydl4j_settings.json", bold=True) + ":\n")
+        click.echo(click.style(pydl4j_json, fg="green", bold=True))
 
         confirm = input("\nDoes this look good? (default 'y') [y/n]: ") or 'yes'
         if not to_bool(confirm):
-            click.echo("" + click.style("Please initialize mvn4py once again", fg="red", bold=True))
+            click.echo("" + click.style("Please initialize pydl4j once again", fg="red", bold=True))
             return
 
-        with open("mvn4py_settings.json", "w") as f:
-            f.write(mvn4py_json)
+        with open("pydl4j_settings.json", "w") as f:
+            f.write(pydl4j_json)
 
-    def load_settings(self, settings_file="mvn4py_settings.json"):
+    def load_settings(self, settings_file="pydl4j_settings.json"):
         if not os.path.isfile(settings_file):
-            raise ClickException("Configure your settings file with `mvn4py init` first.")
+            raise ClickException("Configure your settings file with `pydl4j init` first.")
 
         with open(settings_file) as json_file:
             try:
-                mvn4py_settings = json.load(json_file)
+                pydl4j_settings = json.load(json_file)
             except:
                 raise ValueError("JSON file can't be loaded.")
-        return mvn4py_settings
+        return pydl4j_settings
 
 def handle():
     try:

@@ -16,7 +16,7 @@ setup(
     url='https://github.com/deeplearning4j/mvn4py',
     entry_points={
         'console_scripts': [
-            'mvn4py=mvn4py.cli:handle'
+            'pydl4j=pydl4j.cli:handle'
         ]
     },
     classifiers=[
