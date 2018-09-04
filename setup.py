@@ -1,19 +1,15 @@
 from setuptools import setup
 from setuptools import find_packages
 
-setup(name='mvn4py', packages=find_packages())
-
-from setuptools import setup
-
 setup(
-    name='mvn4py',
+    name='pydl4j',
     version=0.1,
     packages=find_packages(),
     install_requires=['jnius'],
     include_package_data=True,
     license='MIT',
     description='Java dependency management for Python projects using DL4J',
-    url='https://github.com/deeplearning4j/mvn4py',
+    url='https://github.com/deeplearning4j/pydl4j',
     entry_points={
         'console_scripts': [
             'pydl4j=pydl4j.cli:handle'
