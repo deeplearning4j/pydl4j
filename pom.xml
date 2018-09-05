@@ -19,25 +19,21 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
+    <parent>
+        <groupId>org.deeplearning4j</groupId>
+        <artifactId>deeplearning4j</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
 
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.deeplearning4j</groupId>
-    <version>1.0.0-SNAPSHOT</version>
     <artifactId>pydl4j</artifactId>
     <packaging>jar</packaging>
 
     <name>pydl4j</name>
 
-    <properties>
-        <dl4j.spark.version>1.0.0_spark_1-beta2</dl4j.spark.version>
-        <scala.binary.version>2.10</scala.binary.version>
-        <maven-shade-plugin.version>3.0.0</maven-shade-plugin.version>
-        <dl4j.version>1.0.0-beta2</dl4j.version>
-        <spark.version>1.6.3</spark.version>
-        <dl4j.spark.version>1</dl4j.spark.version>
-
-    </properties>
 
     <licenses>
         <license>
