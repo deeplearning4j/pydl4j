@@ -1,151 +1,126 @@
-from .downloader import download as download_file
-import requests
+from .jarmgr import *
+from .jarmgr import _MY_DIR
+import platform
 import os
 
 
-def mkdir(x):
-	if not os.path.isdir(x):
-		os.mkdir(x)
+def get_os():
+    osname = platform.system()
+    os_map = {
+        'Windows': 'windows',
+        'Linux': 'linux',
+        'Darwin': 'mac'
+    }
+    if osname not in os_map:
+        raise ValueError('{} platform is not supported.'.format(osname))
+    return os_map[osname]
 
 
-_CONTEXT_NAME = None
-_CONTEXT_DIR = None
-_USER_PATH = os.path.expanduser('~')
-_MY_DIR = os.path.join(_USER_PATH, '.mvn4py')
-mkdir(_MY_DIR)
+_CONFIG_FILE = os.path.join(_MY_DIR, 'config.json')
 
 
-_cache = {}
-def _read(url):
-    text = _cache.get(url)
-    if text is None:
-        text = requests.get(url).text
-        if not text:
-            raise Exception('Empty response. Check connectivity.')
-        _cache[url] = text
-    return text
+# Default config
+_CONFIG = {
+    'spark_version': '2',
+    'scala_version': '2.11',
+    'nd4j_backend': 'cpu'
+}
 
 
-def _parse_contents(text):
-    contents = text.split('<pre id="contents">')[1]
-    contents = contents.split('</pre>')[0]
-    contents = contents.split('<a href="')
-    _ = contents.pop(0)
-    link_to_parent = contents.pop(0)
-    contents = list(map(lambda x: x.split('"')[0], contents))
-    contents = [c[:-1] for c in contents if c[-1] == '/']  # removes meta data files
-    return contents
+def _write_config():
+    with open(_CONFIG_FILE, 'w') as f:
+        json.dump(_CONFIG, f)    
+
+if os.path.isfile(_CONFIG_FILE):
+    with open(_CONFIG_FILE, 'r') as f:
+        _CONFIG = json.load(f)
+else:
+    _write_config()
 
 
-def check(f):
-    def wrapper(*args, **kwargs):
-        if _CONTEXT_NAME is None:
-            raise Exception('Context not set! Set context using pydl4j.set_context()')
-        mkdir(_CONTEXT_DIR)
-        return f(*args, **kwargs)
-    return wrapper    
+def set_config(config):
+    _CONFIG.update(config)
+    _write_config()
 
 
-def set_context(name):
-    global _CONTEXT_NAME
-    global _CONTEXT_DIR
-    _CONTEXT_NAME = name
-    _CONTEXT_DIR = os.path.join(_MY_DIR, name)
-    mkdir(_CONTEXT_DIR)
+def get_config():
+    return _CONFIG
 
 
-def get_artifacts(group):
-    url = ('https://search.maven.org/remotecontent?filepath=' +
-          'org/{}/'.format(group))
-    response = _read(url)
-    return _parse_contents(response)
+def validate_config(config=None):
+    if config is None:
+        config = _CONFIG
+    valid_options = {
+        'spark_version': ['1', '2'],
+        'scala_version': ['2.10', '2.11'],
+        'nd4j_backend': ['cpu', 'gpu']
+    }
+    for k, vs in valid_options.items():
+        v = config.get(k)
+        if v is None:
+            raise KeyError('Key not found in config : {}.'.format(k))
+        if v not in vs:
+            raise ValueError('Invalid value {} for key {} in config. Valid values are: {}.'.format(v, k, vs))
+
+    # spark 2 does not work with scala 2.10
+    if config['spark_version'] == '2' and config['scala_version'] == '2.10':
+        raise ValueError('Scala 2.10 does not work with spark 2. Set scala_version to 2.11 in pydl4j config. ')
 
 
-def get_versions(group, artifact):
-    url = ('https://search.maven.org/remotecontent?filepath=' +
-          'org/{}/{}/'.format(group, artifact))
-    response = _read(url)
-    return _parse_contents(response)
+def _get_context_from_config():
+    # e.g pydl4j-cpu-spark2-2.11
+    context = 'pydl4j-{}-spark{}-{}'.format(_CONFIG['nd4j_backend'],
+                                            _CONFIG['spark_version'],
+                                            _CONFIG['scala_version'])
+    return context
 
 
-def get_latest_version(group, artifact):
-    return get_versions(group, artifact)[-1]
+set_context(_get_context_from_config())
 
 
-def get_jar_url(group, artifact, version=None):
-    if version is None:
-        version = get_versions(group, artifact)[-1]
-    url = ('http://search.maven.org/remotecontent?filepath=' + 
-          'org/{}/{}/{}/{}-{}.jar'.format(group, artifact, version,
-                                          artifact, version))
-    return url
+def _jumpy_jars():
+    base_name = 'nd4j-uberjar-1.0.0-SNAPSHOT'
+    jar_url = base_name + '-' + _CONFIG['nd4j_backend'] + '.jar'
+    jar_name = base_name + base_name + '.jar'
+    return {jar_name: jar_url}
 
 
-@check
-def context():
-    return _CONTEXT_NAME
+def _pydatavec_jars():
+    base_name = 'datavec-uberjar-1.0.0-SNAPSHOT'
+    spark_v = _CONFIG['spark_version']
+    scala_v = _CONFIG['scala_version']
+    jar_url = base_name + '-spark{}-{}.jar'.format(spark_v, scala_v)
+    jar_name = base_name + base_name + '.jar'
+    return {jar_name: jar_url}
 
 
-@check
-def get_dir():
-    return _CONTEXT_DIR
+def install_jumpy_jars():  # Note: downloads even if already installed.
+    for k, v in _jumpy_jars().items():
+        install(v, k)
+
+def validate_jumpy_jars():
+    installed_jars = get_jars()
+    for k, v in _jumpy_jars().items():
+        if k not in installed_jars:
+            print('pydl4j: Required jar not installed {}.'.format(k))
+        install(v, k)
 
 
-@check
-def install_url(url):
-    jar_name = os.path.basename(url)
-    jar_path = os.path.join(_CONTEXT_DIR, jar_name)    
-    download_file(url, jar_path)
+def install_pydatavec_jars():  # Note: downloads even if already installed.
+    for k, v in _pydatavec_jars().items():
+        install(v, k)   
+
+def validate_pydatavec_jars():
+    installed_jars = get_jars()
+    for k, v in _pydatavec_jars().items():
+        if k not in installed_jars:
+            print('pydl4j: Required jar not installed {}.'.format(k))
+        install(v, k)
 
 
-@check
-def install(group, artifact, version=None):
-    if version is None:
-        version = get_latest_version(group, artifact)
-        print('Version not specified for org.{}.{}.'
-              'Installing latest version: {}.'.format(group, artifact, version))
-    url = get_jar_url(group, artifact, version)
-    sha1_url = url + '.sha1'
-    jar_name = os.path.basename(url)
-    jar_path = os.path.join(_CONTEXT_DIR, jar_name)
-    sha1_path_temp = jar_path + '.sha1.tmp'
-    sha1_path = jar_path + '.sha1'
-    if os.path.isfile(sha1_path):
-        os.remove(sha1_path)
-    if os.path.isfile(sha1_path_temp):
-        os.remove(sha1_path_temp)
-    download_file(sha1_url, sha1_path)
-    os.rename(sha1_path, jar_path + '.sha1')
-    download_file(url, jar_path)
+def set_jnius_config():
+    import jnius_config
+    jnius_config.set_classpath(os.path.join(get_dir, '*'))
+    # Further options can be set by individual projects
 
-
-@check
-def uninstall(artifact, version=None):
-    files = os.listdir(_CONTEXT_DIR)
-    if version is not None:
-        artifact += '-' + version
-    if not artifact.endswith('.jar'):
-        artifact += '.jar'
-    found = False
-    for f in files:
-        if f == artifact or f == artifact + '.sha1':
-            os.remove(os.path.join(_CONTEXT_DIR, f))
-            found = True
-    if not found:
-        raise Exception('No matching jars found : {}. '
-                        'Use pydl4j.get_jars() to see available jars.'.format(artifact))
-
-
-@check
-def get_jars():
-    return [x for x in os.listdir(_CONTEXT_DIR) if x.endswith('.jar')]
-
-
-@check
-def clear_context():
-    for j in get_jars():
-        uninstall(j)
-    try:
-        os.remove(_CONTEXT_DIR)
-    except:
-        pass
+set_jnius_config()
