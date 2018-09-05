@@ -8,6 +8,7 @@ import sys
 import pkg_resources
 import argcomplete
 import traceback
+import subprocess
 from builtins import input
 
 import click
@@ -133,12 +134,14 @@ class CLI(object):
         if not os.path.isfile(settings_file):
             raise ClickException("Configure your settings file with `pydl4j init` first.")
 
-        with open(settings_file) as json_file:
+        base_path = get_base_path()    
+        with open(os.path.join(base_path, settings_file)) as json_file:
             try:
                 pydl4j_settings = json.load(json_file)
             except:
                 raise ValueError("JSON file can't be loaded.")
         return pydl4j_settings
+
 
 def handle():
     try:
@@ -150,6 +153,27 @@ def handle():
         click.echo(click.style("Error: ", fg='red', bold=True))
         traceback.print_exc()
         sys.exit()
+
+
+def check_docker():
+    devnull = open(os.devnull, 'w')
+    try:
+        subprocess.call(["docker", "--help"], stdout=devnull, stderr=devnull)
+        print("success")
+    except:
+        print("failure")
+
+
+def get_base_path():
+    if 'PYDL4J_HOME' in os.environ:
+        _pydl4j_dir = os.environ.get('PYDL4J_HOME')
+    else:
+        _pydl4j_base_dir = os.path.expanduser('~')
+        if not os.access(_pydl4j_base_dir, os.W_OK):
+            _pydl4j_base_dir = '/tmp'
+        _pydl4j_dir = os.path.join(_pydl4j_base_dir, '.pydl4j')
+    return _pydl4j_dir
+
 
 if __name__ == '__main__':
     handle()
