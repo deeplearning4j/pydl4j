@@ -40,7 +40,7 @@ def _parse_contents(text):
 def check(f):
     def wrapper(*args, **kwargs):
         if _CONTEXT_NAME is None:
-            raise Exception('Context not set! Set context using mvn4py.set_context()')
+            raise Exception('Context not set! Set context using pydl4j.set_context()')
         mkdir(_CONTEXT_DIR)
         return f(*args, **kwargs)
     return wrapper    
@@ -133,7 +133,7 @@ def uninstall(artifact, version=None):
             found = True
     if not found:
         raise Exception('No matching jars found : {}. '
-                        'Use mvn4py.get_jars() to see available jars.'.format(artifact))
+                        'Use pydl4j.get_jars() to see available jars.'.format(artifact))
 
 
 @check

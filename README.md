@@ -1,32 +1,32 @@
-# mvn4py
+# pydl4j
 Jar manager for pyjnius applications
 
 ---------
 
-Mvn4py is a lightweight package manager for pyjnius based python applications. Jars can be pulled from Maven central or arbitrary url.
+PyDL4J is a lightweight package manager for pyjnius based python applications. Jars can be pulled from Maven central or arbitrary url.
 
 ### Example:
 
 ```python
-import mvn4py
+import pydl4j
 import jnius_config
 
-mvn4py.set_context('my_python_app_name')
+pydl4j.set_context('my_python_app_name')
 
 # Fetch latest version of datavec.datavec-api from Maven central
-mvn4py.install(group='datavec', artifact='datavec-api')
+pydl4j.install(group='datavec', artifact='datavec-api')
 
 # Or fetch a specific version:
-mvn4py.install(group='datavec', artifact='datavec-api', version='1.0.0-beta')
+pydl4j.install(group='datavec', artifact='datavec-api', version='1.0.0-beta')
 
-jnius_config.set_classpath(mvn4py.get_dir())
+jnius_config.set_classpath(pydl4j.get_dir())
 ```
 
 ### Installation
 
 ```
-git clone https://www.github.com/deeplearning4j/mvn4py.git
-cd mvn4py
+git clone https://www.github.com/deeplearning4j/pydl4j.git
+cd pydl4j
 python setup.py install
 ```
 
@@ -34,11 +34,11 @@ python setup.py install
 
 #### List all artifacts in a group:
 ```python
-mvn4py.get_artifacts(group_id)
+pydl4j.get_artifacts(group_id)
 ```
 ##### Example:
 ```python
-mvn4py.get_atrifacts('datavec')
+pydl4j.get_atrifacts('datavec')
 ```
 ```
 ['datavec-api', 'datavec-arrow', 'datavec-camel', 'datavec-cli', 'datavec-data', 'datavec-data-audio', 'datavec-data-codec', 'datavec-d
@@ -51,13 +51,13 @@ ark_2.11']
 #### List all versions of an artifact:
 
 ```python
-mvn4py.get_versions(group_id, artifact_id)
+pydl4j.get_versions(group_id, artifact_id)
 ```
 
 ##### Example:
 
 ```python
-mvn4py.get_versions('datavec', 'datavec-api')
+pydl4j.get_versions('datavec', 'datavec-api')
 ```
 
 ```
@@ -67,13 +67,13 @@ mvn4py.get_versions('datavec', 'datavec-api')
 #### Get latest version of an artifact:
 
 ```python
-mvn4py.get_latest_version(group_id, artifact_id)
+pydl4j.get_latest_version(group_id, artifact_id)
 ```
 
 ##### Example:
 
 ```python
-mvn4py.get_latest_version('datavec', 'datavec-api')
+pydl4j.get_latest_version('datavec', 'datavec-api')
 ```
 ```
 '1.0.0-beta2'
@@ -82,20 +82,20 @@ mvn4py.get_latest_version('datavec', 'datavec-api')
 #### List all installed jars
 
 ```python
-mvn4py.get_jars()
+pydl4j.get_jars()
 ```
 
 #### Uninstall a jar
 
 ```python
-# Find jar name from mvn4py.get_jars()
-mvn4py.uninstall(jar_name)
+# Find jar name from pydl4j.get_jars()
+pydl4j.uninstall(jar_name)
 ```
 
 #### Uninstall all jars:
 
 ```python
-mvn4py.clear_context()
+pydl4j.clear_context()
 ```
 
 
