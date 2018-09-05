@@ -10,14 +10,15 @@ PyDL4J is a lightweight package manager for pyjnius based python applications. J
 ```python
 import pydl4j
 import jnius_config
+from pydl4j import mvn
 
 pydl4j.set_context('my_python_app_name')
 
 # Fetch latest version of datavec.datavec-api from Maven central
-pydl4j.install(group='datavec', artifact='datavec-api')
+pydl4j.mvn_install(group='datavec', artifact='datavec-api')
 
 # Or fetch a specific version:
-pydl4j.install(group='datavec', artifact='datavec-api', version='1.0.0-beta')
+pydl4j.mvn_install(group='datavec', artifact='datavec-api', version='1.0.0-beta')
 
 jnius_config.set_classpath(pydl4j.get_dir())
 ```
@@ -34,11 +35,11 @@ python setup.py install
 
 #### List all artifacts in a group:
 ```python
-pydl4j.get_artifacts(group_id)
+mvn.get_artifacts(group_id)
 ```
 ##### Example:
 ```python
-pydl4j.get_atrifacts('datavec')
+mvn.get_atrifacts('datavec')
 ```
 ```
 ['datavec-api', 'datavec-arrow', 'datavec-camel', 'datavec-cli', 'datavec-data', 'datavec-data-audio', 'datavec-data-codec', 'datavec-d
@@ -51,13 +52,13 @@ ark_2.11']
 #### List all versions of an artifact:
 
 ```python
-pydl4j.get_versions(group_id, artifact_id)
+mvn.get_versions(group_id, artifact_id)
 ```
 
 ##### Example:
 
 ```python
-pydl4j.get_versions('datavec', 'datavec-api')
+mvn.get_versions('datavec', 'datavec-api')
 ```
 
 ```
@@ -67,13 +68,13 @@ pydl4j.get_versions('datavec', 'datavec-api')
 #### Get latest version of an artifact:
 
 ```python
-pydl4j.get_latest_version(group_id, artifact_id)
+mvn.get_latest_version(group_id, artifact_id)
 ```
 
 ##### Example:
 
 ```python
-pydl4j.get_latest_version('datavec', 'datavec-api')
+mvn.get_latest_version('datavec', 'datavec-api')
 ```
 ```
 '1.0.0-beta2'
