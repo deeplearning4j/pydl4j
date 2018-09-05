@@ -2,6 +2,7 @@ from .jarmgr import *
 from .jarmgr import _MY_DIR
 import platform
 import os
+import warnings
 
 
 def get_os():
@@ -79,18 +80,20 @@ set_context(_get_context_from_config())
 
 
 def _jumpy_jars():
+    url = 'https://github.com/deeplearning4j/pydl4j_jars/releases/download/v0.1-alpha/'
     base_name = 'nd4j-uberjar-1.0.0-SNAPSHOT'
-    jar_url = base_name + '-' + _CONFIG['nd4j_backend'] + '.jar'
-    jar_name = base_name + base_name + '.jar'
+    jar_url = url + base_name + '-' + _CONFIG['nd4j_backend'] + '.jar'
+    jar_name = base_name + '.jar'
     return {jar_name: jar_url}
 
 
 def _pydatavec_jars():
+    url = 'https://github.com/deeplearning4j/pydl4j_jars/releases/download/v0.1-alpha/'
     base_name = 'datavec-uberjar-1.0.0-SNAPSHOT'
     spark_v = _CONFIG['spark_version']
     scala_v = _CONFIG['scala_version']
-    jar_url = base_name + '-spark{}-{}.jar'.format(spark_v, scala_v)
-    jar_name = base_name + base_name + '.jar'
+    jar_url = url + base_name + '-spark{}-{}.jar'.format(spark_v, scala_v)
+    jar_name = base_name + '.jar'
     return {jar_name: jar_url}
 
 
@@ -103,7 +106,7 @@ def validate_jumpy_jars():
     for k, v in _jumpy_jars().items():
         if k not in installed_jars:
             print('pydl4j: Required jar not installed {}.'.format(k))
-        install(v, k)
+            install(v, k)
 
 
 def install_pydatavec_jars():  # Note: downloads even if already installed.
@@ -115,12 +118,15 @@ def validate_pydatavec_jars():
     for k, v in _pydatavec_jars().items():
         if k not in installed_jars:
             print('pydl4j: Required jar not installed {}.'.format(k))
-        install(v, k)
+            install(v, k)
 
 
 def set_jnius_config():
-    import jnius_config
-    jnius_config.set_classpath(os.path.join(get_dir, '*'))
+    try:
+        import jnius_config
+        jnius_config.set_classpath(os.path.join(get_dir(), '*'))
     # Further options can be set by individual projects
+    except ImportError:
+        warnings.warn('Pyjnius not installed.')
 
 set_jnius_config()
