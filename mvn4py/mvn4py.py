@@ -11,6 +11,8 @@ def mkdir(x):
 _CONTEXT_NAME = None
 _CONTEXT_DIR = None
 _USER_PATH = os.path.expanduser('~')
+_MY_DIR = os.path.join(_USER_PATH, '.mvn4py')
+mkdir(_MY_DIR)
 
 
 _cache = {}
@@ -48,7 +50,7 @@ def set_context(name):
     global _CONTEXT_NAME
     global _CONTEXT_DIR
     _CONTEXT_NAME = name
-    _CONTEXT_DIR = os.path.join(_USER_PATH, '.' + name)
+    _CONTEXT_DIR = os.path.join(_MY_DIR, name)
     mkdir(_CONTEXT_DIR)
 
 
@@ -126,7 +128,7 @@ def uninstall(artifact, version=None):
         artifact += '.jar'
     found = False
     for f in files:
-        if f == artifact:
+        if f == artifact or f == artifact + '.sha1':
             os.remove(os.path.join(_CONTEXT_DIR, f))
             found = True
     if not found:

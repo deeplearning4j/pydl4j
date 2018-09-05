@@ -21,6 +21,7 @@ def download(url, file_name):
         if local_file_size == file_size:
             sha1_file = file_name + '.sha1'
             if os.path.isfile(sha1_file):
+                print('sha1 found')
                 with open(sha1_file) as f:
                     expected_sha1 = f.read()
                 BLOCKSIZE = 65536
