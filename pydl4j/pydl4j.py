@@ -75,9 +75,11 @@ def validate_config(config=None):
 
 def _get_context_from_config():
     # e.g pydl4j-cpu-spark2-2.11
-    context = 'pydl4j-{}-spark{}-{}'.format(_CONFIG['nd4j_backend'],
-                                            _CONFIG['spark_version'],
-                                            _CONFIG['scala_version'])
+    context = 'pydl4j-{}-{}-spark{}-{}'.format(
+        _CONFIG['dl4j_version'],
+        _CONFIG['nd4j_backend'],
+        _CONFIG['spark_version'],
+        _CONFIG['scala_version'])
     return context
 
 

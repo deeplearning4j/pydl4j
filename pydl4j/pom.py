@@ -41,7 +41,8 @@ def create_pom_from_config():
         else:
             dl4j_spark_version = dl4j_version + "_spark_" + spark_version
         pom = pom.replace('{dl4j.spark.version}', dl4j_spark_version)
-        
+    
+    # TODO replace if exists
     pom_xml = os.path.join(_MY_DIR, 'pom.xml')
     with open(pom_xml, 'w') as pom_file:
         pom_file.write(pom)
