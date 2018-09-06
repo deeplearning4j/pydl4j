@@ -113,10 +113,14 @@ def create_pom_from_config():
     pom = pom.replace('{dl4j.version}', dl4j_version)
 
     if nd4j_backend == 'cpu':
+        platform_backend = "nd4j-native-platform"
         backend = "nd4j-native"
     else:
-        backend = "nd4j-cuda-9.2-platform"
+        platform_backend = "nd4j-cuda-9.2-platform"
+        platform_backend = "nd4j-cuda-9.2"
+
     pom = pom.replace('{nd4j.backend}', backend)
+    pom = pom.replace('{nd4j.platform.backend}', platform_backend)
 
     if use_spark:
         pom = pom.replace('{scala.binary.version}', scala_version)

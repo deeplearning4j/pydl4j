@@ -21,7 +21,7 @@ from .pydl4j import validate_config
 
 _CONFIG = get_config()
 
-DEFAULT_DL4J_VERSION = _CONFIG['dl4j_version']
+DEFAULT_DL4J_VERSION = '1.0.0-beta2' # doesn't currently work with snapshots :/
 DEFAULT_BACKEND = _CONFIG['nd4j_backend']
 DEFAULT_DATAVEC = _CONFIG['datavec']
 DEFAULT_SPARK = _CONFIG['spark']
@@ -106,13 +106,12 @@ class CLI(object):
         # Spark
         spark = input("Do you need Spark for distributed computation in your application? (default 'y') [y/n]: ") or DEFAULT_SPARK
         spark = to_bool(spark)
+        spark_version = DEFAULT_SPARK_MAJOR
+        scala_version = DEFAULT_SCALA_VERSION
         if spark:
             spark_details = input("We use Spark {} and Scala {} by default, is this OK for you? (default 'y') [y/n]: ".format(DEFAULT_SPARK_MAJOR,
                 DEFAULT_SCALA_VERSION)) or DEFAULT_SPARK_DETAILS
-            if spark_details[0] in ["Y", "y"]:
-                spark_version = DEFAULT_SPARK_MAJOR
-                scala_version = DEFAULT_SCALA_VERSION
-            else:
+            if not spark_details[0] in ["Y", "y"]:
                 spark_version = input("Which which major Spark release would you like to use? (default '%s'): " % DEFAULT_SPARK_MAJOR) or DEFAULT_SPARK_MAJOR
                 scala_version = input("Which Scala version would you like to use? (default '%s'): " % DEFAULT_SCALA_VERSION) or DEFAULT_SCALA_VERSION
 
