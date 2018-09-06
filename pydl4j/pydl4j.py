@@ -172,7 +172,7 @@ def install_docker_jars():
      #   install_from_docker()
 
 
-def _jumpy_jars():
+def _nd4j_jars():
     url = 'https://deeplearning4jblob.blob.core.windows.net/jars/'
     base_name = 'nd4j-uberjar-1.0.0-SNAPSHOT'
     jar_url = url + base_name + '-' + _CONFIG['nd4j_backend'] + '.jar'
@@ -180,7 +180,7 @@ def _jumpy_jars():
     return {jar_name: jar_url}
 
 
-def _pydatavec_jars():
+def _datavec_jars():
     url = 'https://deeplearning4jblob.blob.core.windows.net/jars/'
     base_name = 'datavec-uberjar-1.0.0-SNAPSHOT'
     spark_v = _CONFIG['spark_version']
@@ -190,25 +190,27 @@ def _pydatavec_jars():
     return {jar_name: jar_url}
 
 
-def install_jumpy_jars():  # Note: downloads even if already installed.
-    for k, v in _jumpy_jars().items():
+def install_nd4j_jars():  # Note: downloads even if already installed.
+    for k, v in _nd4j_jars().items():
         install(v, k)
 
-def validate_jumpy_jars():
+
+def validate_nd4j_jars():
     installed_jars = get_jars()
-    for k, v in _jumpy_jars().items():
+    for k, v in _nd4j_jars().items():
         if k not in installed_jars:
             print('pydl4j: Required jar not installed {}.'.format(k))
             install(v, k)
 
 
-def install_pydatavec_jars():  # Note: downloads even if already installed.
-    for k, v in _pydatavec_jars().items():
+def install_datavec_jars():  # Note: downloads even if already installed.
+    for k, v in _datavec_jars().items():
         install(v, k)   
 
-def validate_pydatavec_jars():
+
+def validate_datavec_jars():
     installed_jars = get_jars()
-    for k, v in _pydatavec_jars().items():
+    for k, v in _datavec_jars().items():
         if k not in installed_jars:
             print('pydl4j: Required jar not installed {}.'.format(k))
             install(v, k)
@@ -223,5 +225,3 @@ def set_jnius_config():
         warnings.warn('Pyjnius not installed.')
 
 set_jnius_config()
-
-
