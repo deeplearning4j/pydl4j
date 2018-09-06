@@ -173,7 +173,7 @@ def install_docker_jars():
 
 
 def _jumpy_jars():
-    url = 'https://github.com/deeplearning4j/pydl4j_jars/releases/download/v0.1-alpha/'
+    url = 'https://deeplearning4jblob.blob.core.windows.net/jars/'
     base_name = 'nd4j-uberjar-1.0.0-SNAPSHOT'
     jar_url = url + base_name + '-' + _CONFIG['nd4j_backend'] + '.jar'
     jar_name = base_name + '.jar'
@@ -181,7 +181,7 @@ def _jumpy_jars():
 
 
 def _pydatavec_jars():
-    url = 'https://github.com/deeplearning4j/pydl4j_jars/releases/download/v0.1-alpha/'
+    url = 'https://deeplearning4jblob.blob.core.windows.net/jars/'
     base_name = 'datavec-uberjar-1.0.0-SNAPSHOT'
     spark_v = _CONFIG['spark_version']
     scala_v = _CONFIG['scala_version']
