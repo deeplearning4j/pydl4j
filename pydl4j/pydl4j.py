@@ -1,5 +1,6 @@
 from .jarmgr import *
 from .jarmgr import _MY_DIR
+from .docker import install_from_docker
 import platform
 import os
 import warnings
@@ -74,7 +75,7 @@ def validate_config(config=None):
 
 
 def _get_context_from_config():
-    # e.g pydl4j-cpu-spark2-2.11
+    # e.g pydl4j-1.0.0-SNAPSHOT-cpu-spark2-2.11
     context = 'pydl4j-{}-{}-spark{}-{}'.format(
         _CONFIG['dl4j_version'],
         _CONFIG['nd4j_backend'],
@@ -84,6 +85,15 @@ def _get_context_from_config():
 
 
 set_context(_get_context_from_config())
+
+
+def install_docker_jars():
+    jars = get_jars()
+    dl4j_version = _CONFIG['dl4j_version']
+    jar_name = "pydl4j-{}-bin.jar".format(dl4j_version)
+    jar = os.path.join(get_dir(), jar_name)
+    #if not jar in jars:
+     #   install_from_docker()
 
 
 def _jumpy_jars():

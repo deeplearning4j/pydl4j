@@ -3,8 +3,9 @@ from subprocess import call
 
 from .jarmgr import _MY_DIR as base_dir
 from .jarmgr import get_dir
+# from . import get_config
 from .pom import create_pom_from_config
-from .pydl4j import get_config
+
 
 def docker_file():
     return """FROM java:openjdk-8-jdk
@@ -23,6 +24,7 @@ WORKDIR /app
 CMD ["mvn", "package"]
 """
 
+
 def docker_build():
     docker_path = os.path.join(base_dir, 'Dockerfile')
     docker_string = docker_file()
@@ -30,6 +32,7 @@ def docker_build():
         f.write(docker_string)
 
     call(["sudo", "docker", "build", base_dir, "-t", "pydl4j"])
+
 
 def docker_run():
     create_pom_from_config()
@@ -46,3 +49,6 @@ def docker_run():
     call(["sudo", "mv", source, target])
 
 
+def install_from_docker():
+    docker_build()
+    docker_run()

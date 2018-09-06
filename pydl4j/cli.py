@@ -18,6 +18,7 @@ from dateutil import parser
 from .pydl4j import _CONFIG
 from .pydl4j import set_config, get_config
 from .pydl4j import validate_config
+# from .pydl4j import install_docker_jars
 
 _CONFIG = get_config()
 
@@ -64,13 +65,14 @@ class CLI(object):
         if self.command == 'init':
             self.init()
             return
+        
+        if self.command == 'install':
+            self.install()
+            return
 
-  
 
-    def init(self, settings_file="pydl4j.json"):
 
-        if os.path.isfile(settings_file):
-            raise ClickException("This project already has a " + click.style("{0!s} file".format(settings_file), fg="red", bold=True) + "!")
+    def init(self):
 
         click.echo(click.style(u"""\n██████╗ ██╗   ██╗██████╗ ██╗██╗  ██╗     ██╗
 ██╔══██╗╚██╗ ██╔╝██╔══██╗██║██║  ██║     ██║
@@ -134,6 +136,10 @@ class CLI(object):
             return
 
         set_config(cli_out)
+
+    def install(self):
+        # TODO: optionally download uberjars
+        install_from_docker()
 
 
 def handle():
