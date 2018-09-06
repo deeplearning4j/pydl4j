@@ -16,34 +16,35 @@ def create_pom_from_config():
     use_datavec = config['datavec']
 
     datavec_deps = datavec_dependencies() if use_datavec else ""
-    pom.replace('{datavec.dependencies}', datavec_deps)
+    pom =pom.replace('{datavec.dependencies}', datavec_deps)
 
     core_deps = dl4j_core_dependencies() if use_dl4j_core else ""
-    pom.replace('{dl4j.core.dependencies}', core_deps)
+    pom = pom.replace('{dl4j.core.dependencies}', core_deps)
 
     spark_deps = spark_dependencies() if use_spark else ""
-    pom.replace('{spark.dependencies}', spark_deps)
+    pom = pom.replace('{spark.dependencies}', spark_deps)
 
-    pom.replace('{dl4j.version}', dl4j_version)
+    pom = pom.replace('{dl4j.version}', dl4j_version)
 
     if nd4j_backend == 'cpu':
         backend = "nd4j-native"
     else:
         backend = "nd4j-cuda-9.2-platform"
-    pom.replace('{nd4j.backend}', backend)
+    pom = pom.replace('{nd4j.backend}', backend)
 
     if use_spark:
-        pom.replace('{scala.binary.version}', scala_version)
+        pom = pom.replace('{scala.binary.version}', scala_version)
         # this naming convention seems a little off
         if "SNAPSHOT" in dl4j_version:
             dl4j_version = dl4j_version.replace("-SNAPSHOT", "")
             dl4j_spark_version = dl4j_version + "_spark_" + spark_version + "-SNAPSHOT"
         else:
             dl4j_spark_version = dl4j_version + "_spark_" + spark_version
-        pom.replace('{dl4j.spark.version}', dl4j_spark_version)
+        pom = pom.replace('{dl4j.spark.version}', dl4j_spark_version)
         
-
     pom_xml = os.path.join(_MY_DIR, 'pom.xml')
+    with open(pom_xml, 'w') as pom_file:
+        pom_file.write(pom)
 
 
 def dl4j_core_dependencies():
