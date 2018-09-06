@@ -15,22 +15,24 @@ import click
 from click.exceptions import ClickException
 from dateutil import parser
 
-from .pydl4j import _CONFIG
-from .pydl4j import set_config, get_config
+from .pydl4j import set_config, get_config, install_from_docker
 from .pydl4j import validate_config
+# from .pydl4j import install_docker_jars
 
 _CONFIG = get_config()
 
-DEFAULT_DL4J_VERSION = "1.0.0-SNAPSHOT"
+DEFAULT_DL4J_VERSION = _CONFIG['dl4j_version']
 DEFAULT_BACKEND = _CONFIG['nd4j_backend']
-DEFAULT_DATAVEC = 'y'
-DEFAULT_SPARK = 'y'
+DEFAULT_DATAVEC = _CONFIG['datavec']
+DEFAULT_SPARK = _CONFIG['spark']
 DEFAULT_SPARK_MAJOR = _CONFIG['spark_version']
 DEFAULT_SCALA_VERSION = _CONFIG['scala_version']
 DEFAULT_SPARK_DETAILS = 'y'
 
 
 def to_bool(string):
+    if type(string) is bool:
+        return string
     return True if string[0] in ["Y", "y"] else False
 
 class CLI(object):
@@ -50,6 +52,8 @@ class CLI(object):
 
         subparsers = parser.add_subparsers(title='subcommands', dest='command')
         subparsers.add_parser('init', help='Initialize pydl4j')
+        subparsers.add_parser('install', help='Install jars for pydl4j')
+
 
         argcomplete.autocomplete(parser)
         args = parser.parse_args(args)
@@ -64,13 +68,14 @@ class CLI(object):
         if self.command == 'init':
             self.init()
             return
+        
+        if self.command == 'install':
+            self.install()
+            return
 
-  
 
-    def init(self, settings_file="pydl4j.json"):
 
-        if os.path.isfile(settings_file):
-            raise ClickException("This project already has a " + click.style("{0!s} file".format(settings_file), fg="red", bold=True) + "!")
+    def init(self):
 
         click.echo(click.style(u"""\n██████╗ ██╗   ██╗██████╗ ██╗██╗  ██╗     ██╗
 ██╔══██╗╚██╗ ██╔╝██╔══██╗██║██║  ██║     ██║
@@ -123,10 +128,10 @@ class CLI(object):
         }
 
         validate_config(cli_out)
-        pydl4j_json = json.dumps(cli_out, sort_keys=False, indent=2)
+        formatted_json = json.dumps(cli_out, sort_keys=False, indent=2)
 
         click.echo("\nThis is your current settings file " + click.style("config.json", bold=True) + ":\n")
-        click.echo(click.style(cli_out, fg="green", bold=True))
+        click.echo(click.style(formatted_json, fg="green", bold=True))
 
         confirm = input("\nDoes this look good? (default 'y') [y/n]: ") or 'yes'
         if not to_bool(confirm):
@@ -135,14 +140,15 @@ class CLI(object):
 
         set_config(cli_out)
 
+    def install(self):
+        # TODO: optionally download uberjars
+        check_docker()
 
-        base_path = get_base_path()    
-        with open(os.path.join(base_path, settings_file)) as json_file:
-            try:
-                pydl4j_settings = json.load(json_file)
-            except:
-                raise ValueError("JSON file can't be loaded.")
-        return pydl4j_settings
+        click.echo(click.style("========\n\nNote that this might take some time to complete.\n" + \
+        "We will first pull a docker container with Maven, then install all dependencies selected with 'pydl4j init'.\n" + \
+        "After completion you can start using DL4J from Python.\n\n========", fg="green", bold=False))
+
+        install_from_docker()
 
 
 def handle():
@@ -161,21 +167,10 @@ def check_docker():
     devnull = open(os.devnull, 'w')
     try:
         subprocess.call(["docker", "--help"], stdout=devnull, stderr=devnull)
-        print("success")
+        click.echo(click.style("Docker is running, starting installation.", fg="green", bold=True))
     except:
-        print("failure")
-
-
-def get_base_path():
-    if 'PYDL4J_HOME' in os.environ:
-        _pydl4j_dir = os.environ.get('PYDL4J_HOME')
-    else:
-        _pydl4j_base_dir = os.path.expanduser('~')
-        if not os.access(_pydl4j_base_dir, os.W_OK):
-            _pydl4j_base_dir = '/tmp'
-        _pydl4j_dir = os.path.join(_pydl4j_base_dir, '.pydl4j')
-    return _pydl4j_dir
-
+        click.echo("" + click.style("Could not detect docker on your system. Make sure a docker deamon is running", fg="red", bold=True))
+        raise Exception("Aborting installation, docker not found.")
 
 if __name__ == '__main__':
     handle()
