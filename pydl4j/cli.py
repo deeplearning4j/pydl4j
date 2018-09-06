@@ -15,13 +15,18 @@ import click
 from click.exceptions import ClickException
 from dateutil import parser
 
+from .pydl4j import _CONFIG
+from .pydl4j import set_config, get_config
+from .pydl4j import validate_config
+
+_CONFIG = get_config()
 
 DEFAULT_DL4J_VERSION = "1.0.0-SNAPSHOT"
-DEFAULT_BACKEND = "gpu"
+DEFAULT_BACKEND = _CONFIG['nd4j_backend']
 DEFAULT_DATAVEC = 'y'
 DEFAULT_SPARK = 'y'
-DEFAULT_SPARK_MAJOR = "2"
-DEFAULT_SCALA_VERSION = "2.10"
+DEFAULT_SPARK_MAJOR = _CONFIG['spark_version']
+DEFAULT_SCALA_VERSION = _CONFIG['scala_version']
 DEFAULT_SPARK_DETAILS = 'y'
 
 
@@ -96,20 +101,20 @@ class CLI(object):
         # Spark
         spark = input("Do you need Spark for distributed computation in your application? (default 'y') [y/n]: ") or DEFAULT_SPARK
         spark = to_bool(spark)
+        if spark:
+            spark_details = input("We use Spark {} and Scala {} by default, is this OK for you? (default 'y') [y/n]: ".format(DEFAULT_SPARK_MAJOR,
+                DEFAULT_SCALA_VERSION)) or DEFAULT_SPARK_DETAILS
+            if spark_details[0] in ["Y", "y"]:
+                spark_version = DEFAULT_SPARK_MAJOR
+                scala_version = DEFAULT_SCALA_VERSION
+            else:
+                spark_version = input("Which which major Spark release would you like to use? (default '%s'): " % DEFAULT_SPARK_MAJOR) or DEFAULT_SPARK_MAJOR
+                scala_version = input("Which Scala version would you like to use? (default '%s'): " % DEFAULT_SCALA_VERSION) or DEFAULT_SCALA_VERSION
 
-        spark_details = input("We use Spark {} and Scala {} by default, is this OK for you? (default 'y') [y/n]: ".format(DEFAULT_SPARK_MAJOR,
-            DEFAULT_SCALA_VERSION)) or DEFAULT_SPARK_DETAILS
-        if spark_details[0] in ["Y", "y"]:
-            spark_version = "2"
-            scala_version = "2.10"
-        else:
-            spark_version = input("Which which major Spark release would you like to use? (default '%s'): " % DEFAULT_SPARK_MAJOR) or DEFAULT_SPARK_MAJOR
-            scala_version = input("Which Scala version would you like to use? (default '%s'): " % DEFAULT_SCALA_VERSION) or DEFAULT_SCALA_VERSION
 
-
-        pydl4j_settings = {
+        cli_out = {
                 'dl4j_version': dl4j_version,
-                'backend': backend,
+                'nd4j_backend': backend,
                 'dl4j_core': dl4j_core,
                 'datavec': datavec,
                 'spark': spark,
@@ -117,22 +122,19 @@ class CLI(object):
                 'scala_version': scala_version
         }
 
-        pydl4j_json = json.dumps(pydl4j_settings, sort_keys=False, indent=2)
+        validate_config(cli_out)
+        pydl4j_json = json.dumps(cli_out, sort_keys=False, indent=2)
 
-        click.echo("\nThis is your current settings file " + click.style("pydl4j_settings.json", bold=True) + ":\n")
-        click.echo(click.style(pydl4j_json, fg="green", bold=True))
+        click.echo("\nThis is your current settings file " + click.style("config.json", bold=True) + ":\n")
+        click.echo(click.style(cli_out, fg="green", bold=True))
 
         confirm = input("\nDoes this look good? (default 'y') [y/n]: ") or 'yes'
         if not to_bool(confirm):
             click.echo("" + click.style("Please initialize pydl4j once again", fg="red", bold=True))
             return
 
-        with open("pydl4j_settings.json", "w") as f:
-            f.write(pydl4j_json)
+        set_config(cli_out)
 
-    def load_settings(self, settings_file="pydl4j_settings.json"):
-        if not os.path.isfile(settings_file):
-            raise ClickException("Configure your settings file with `pydl4j init` first.")
 
         base_path = get_base_path()    
         with open(os.path.join(base_path, settings_file)) as json_file:
