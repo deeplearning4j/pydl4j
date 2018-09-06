@@ -20,8 +20,13 @@ def get_os():
 _CONFIG_FILE = os.path.join(_MY_DIR, 'config.json')
 
 
+
 # Default config
 _CONFIG = {
+    'dl4j_version': '1.0.0-SNAPSHOT',
+    'dl4j_core': True,
+    'datavec': True,
+    'spark': True,
     'spark_version': '2',
     'scala_version': '2.11',
     'nd4j_backend': 'cpu'

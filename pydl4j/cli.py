@@ -21,10 +21,10 @@ from .pydl4j import validate_config
 
 _CONFIG = get_config()
 
-DEFAULT_DL4J_VERSION = "1.0.0-SNAPSHOT"
+DEFAULT_DL4J_VERSION = _CONFIG['dl4j_version']
 DEFAULT_BACKEND = _CONFIG['nd4j_backend']
-DEFAULT_DATAVEC = 'y'
-DEFAULT_SPARK = 'y'
+DEFAULT_DATAVEC = _CONFIG['datavec']
+DEFAULT_SPARK = _CONFIG['spark']
 DEFAULT_SPARK_MAJOR = _CONFIG['spark_version']
 DEFAULT_SCALA_VERSION = _CONFIG['scala_version']
 DEFAULT_SPARK_DETAILS = 'y'
@@ -123,10 +123,10 @@ class CLI(object):
         }
 
         validate_config(cli_out)
-        pydl4j_json = json.dumps(cli_out, sort_keys=False, indent=2)
+        formatted_json = json.dumps(cli_out, sort_keys=False, indent=2)
 
         click.echo("\nThis is your current settings file " + click.style("config.json", bold=True) + ":\n")
-        click.echo(click.style(cli_out, fg="green", bold=True))
+        click.echo(click.style(formatted_json, fg="green", bold=True))
 
         confirm = input("\nDoes this look good? (default 'y') [y/n]: ") or 'yes'
         if not to_bool(confirm):
@@ -134,15 +134,6 @@ class CLI(object):
             return
 
         set_config(cli_out)
-
-
-        base_path = get_base_path()    
-        with open(os.path.join(base_path, settings_file)) as json_file:
-            try:
-                pydl4j_settings = json.load(json_file)
-            except:
-                raise ValueError("JSON file can't be loaded.")
-        return pydl4j_settings
 
 
 def handle():
@@ -164,18 +155,6 @@ def check_docker():
         print("success")
     except:
         print("failure")
-
-
-def get_base_path():
-    if 'PYDL4J_HOME' in os.environ:
-        _pydl4j_dir = os.environ.get('PYDL4J_HOME')
-    else:
-        _pydl4j_base_dir = os.path.expanduser('~')
-        if not os.access(_pydl4j_base_dir, os.W_OK):
-            _pydl4j_base_dir = '/tmp'
-        _pydl4j_dir = os.path.join(_pydl4j_base_dir, '.pydl4j')
-    return _pydl4j_dir
-
 
 if __name__ == '__main__':
     handle()
