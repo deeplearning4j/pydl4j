@@ -174,46 +174,57 @@ def install_docker_jars():
 
 def _nd4j_jars():
     url = 'https://deeplearning4jblob.blob.core.windows.net/jars/'
-    base_name = 'nd4j-uberjar-1.0.0-SNAPSHOT'
-    jar_url = url + base_name + '-' + _CONFIG['nd4j_backend'] + '.jar'
-    jar_name = base_name + '.jar'
-    return {jar_name: jar_url}
+    base_name = 'nd4j-uberjar'
+    version = '1.0.0-SNAPSHOT'  # uploaded uber jar version. Version installed using docker can be different.
+    jar_url = url + '{}-{}-{}-{}-no_avx.jar'.format(base_name, version, get_os(), _CONFIG['nd4j_backend'])
+    jar_name = '{}-{}.jar'.format(base_name, version)
+    return {base_name: [jar_url, jar_name]}
 
 
 def _datavec_jars():
     url = 'https://deeplearning4jblob.blob.core.windows.net/jars/'
-    base_name = 'datavec-uberjar-1.0.0-SNAPSHOT'
+    base_name = 'datavec-uberjar'
+    version = '1.0.0-SNAPSHOT'
     spark_v = _CONFIG['spark_version']
     scala_v = _CONFIG['scala_version']
-    jar_url = url + base_name + '-spark{}-{}.jar'.format(spark_v, scala_v)
-    jar_name = base_name + '.jar'
-    return {jar_name: jar_url}
+    jar_url = url + base_name + '-{}-spark{}-{}.jar'.format(version, spark_v, scala_v)
+    jar_name = '{}-{}.jar'.format(base_name, version)
+    return {base_name: [jar_url, jar_name]}
 
 
-def install_nd4j_jars():  # Note: downloads even if already installed.
-    for k, v in _nd4j_jars().items():
-        install(v, k)
+def _validate_jars(jars):
+    installed_jars = get_jars()
+    for k, v in jars.items():
+        found = False
+        for j in installed_jars:
+            if j.startswith(k):
+                found = True
+                break
+        if not found:
+            print('pydl4j: Required jar not installed {}.'.format(v[1]))
+            install(v[0], v[1])
+            # TODO : Handover to docker/mvn for configs not available as uberjars
+
+
+def _install_jars(jars):  # Note: downloads even if already installed.
+    for v in jars.values():
+        install(v[0], v[1])    
+
+
+def install_nd4j_jars():
+    _install_jars(_nd4j_jars)
 
 
 def validate_nd4j_jars():
-    installed_jars = get_jars()
-    for k, v in _nd4j_jars().items():
-        if k not in installed_jars:
-            print('pydl4j: Required jar not installed {}.'.format(k))
-            install(v, k)
+    _validate_jars(_nd4j_jars())
 
 
-def install_datavec_jars():  # Note: downloads even if already installed.
-    for k, v in _datavec_jars().items():
-        install(v, k)   
+def install_datavec_jars():
+    _install_jars(_datavec_jars())  
 
 
 def validate_datavec_jars():
-    installed_jars = get_jars()
-    for k, v in _datavec_jars().items():
-        if k not in installed_jars:
-            print('pydl4j: Required jar not installed {}.'.format(k))
-            install(v, k)
+    _validate_jars(_datavec_jars())
 
 
 def set_jnius_config():
