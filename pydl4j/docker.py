@@ -2,7 +2,9 @@ import os
 from subprocess import call
 
 from .jarmgr import _MY_DIR as base_dir
+from .jarmgr import get_dir
 from .pom import create_pom_from_config
+from .pydl4j import get_config
 
 def docker_file():
     return """FROM java:openjdk-8-jdk
@@ -32,4 +34,15 @@ def docker_build():
 def docker_run():
     create_pom_from_config()
     call(["sudo", "docker", "run", "--mount", "src=" + base_dir + ",target=/app,type=bind", "pydl4j"])
+    # docker will build into <context>/target, need to move to context dir
+    context_dir = get_dir()
+    config = get_config()
+    dl4j_version = config['dl4j_version']
+    jar_name = "pydl4j-{}-bin.jar".format(dl4j_version)
+    base_target_dir = os.path.join(base_dir, "target")
+    source = os.path.join(base_target_dir, jar_name)
+    target = os.path.join(context_dir, jar_name)
+    # os.rename or shutil won't work in all cases, need to assume sudo role
+    call(["sudo", "mv", source, target])
+
 
