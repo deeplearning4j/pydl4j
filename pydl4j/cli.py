@@ -15,8 +15,7 @@ import click
 from click.exceptions import ClickException
 from dateutil import parser
 
-from .pydl4j import _CONFIG
-from .pydl4j import set_config, get_config
+from .pydl4j import set_config, get_config, install_from_docker
 from .pydl4j import validate_config
 # from .pydl4j import install_docker_jars
 
@@ -32,6 +31,8 @@ DEFAULT_SPARK_DETAILS = 'y'
 
 
 def to_bool(string):
+    if type(string) is bool:
+        return string
     return True if string[0] in ["Y", "y"] else False
 
 class CLI(object):
@@ -51,6 +52,8 @@ class CLI(object):
 
         subparsers = parser.add_subparsers(title='subcommands', dest='command')
         subparsers.add_parser('init', help='Initialize pydl4j')
+        subparsers.add_parser('install', help='Install jars for pydl4j')
+
 
         argcomplete.autocomplete(parser)
         args = parser.parse_args(args)
@@ -139,6 +142,12 @@ class CLI(object):
 
     def install(self):
         # TODO: optionally download uberjars
+        check_docker()
+
+        click.echo(click.style("========\n\nNote that this might take some time to complete.\n" + \
+        "We will first pull a docker container with Maven, then install all dependencies selected with 'pydl4j init'.\n" + \
+        "After completion you can start using DL4J from Python.\n\n========", fg="green", bold=False))
+
         install_from_docker()
 
 
@@ -158,9 +167,10 @@ def check_docker():
     devnull = open(os.devnull, 'w')
     try:
         subprocess.call(["docker", "--help"], stdout=devnull, stderr=devnull)
-        print("success")
+        click.echo(click.style("Docker is running, starting installation.", fg="green", bold=True))
     except:
-        print("failure")
+        click.echo("" + click.style("Could not detect docker on your system. Make sure a docker deamon is running", fg="red", bold=True))
+        raise Exception("Aborting installation, docker not found.")
 
 if __name__ == '__main__':
     handle()

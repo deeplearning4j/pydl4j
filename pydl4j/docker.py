@@ -1,12 +1,3 @@
-import os
-from subprocess import call
-
-from .jarmgr import _MY_DIR as base_dir
-from .jarmgr import get_dir
-# from . import get_config
-from .pom import create_pom_from_config
-
-
 def docker_file():
     return """FROM java:openjdk-8-jdk
 ENV MAVEN_VERSION 3.3.9
@@ -23,32 +14,3 @@ WORKDIR /app
 
 CMD ["mvn", "package"]
 """
-
-
-def docker_build():
-    docker_path = os.path.join(base_dir, 'Dockerfile')
-    docker_string = docker_file()
-    with open(docker_path, 'w') as f:
-        f.write(docker_string)
-
-    call(["sudo", "docker", "build", base_dir, "-t", "pydl4j"])
-
-
-def docker_run():
-    create_pom_from_config()
-    call(["sudo", "docker", "run", "--mount", "src=" + base_dir + ",target=/app,type=bind", "pydl4j"])
-    # docker will build into <context>/target, need to move to context dir
-    context_dir = get_dir()
-    config = get_config()
-    dl4j_version = config['dl4j_version']
-    jar_name = "pydl4j-{}-bin.jar".format(dl4j_version)
-    base_target_dir = os.path.join(base_dir, "target")
-    source = os.path.join(base_target_dir, jar_name)
-    target = os.path.join(context_dir, jar_name)
-    # os.rename or shutil won't work in all cases, need to assume sudo role
-    call(["sudo", "mv", source, target])
-
-
-def install_from_docker():
-    docker_build()
-    docker_run()

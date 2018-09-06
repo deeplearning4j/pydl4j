@@ -1,9 +1,12 @@
 from .jarmgr import *
 from .jarmgr import _MY_DIR
-from .docker import install_from_docker
+from .pom import *
+from .docker import docker_file
 import platform
 import os
 import warnings
+import os
+from subprocess import call
 
 
 def get_os():
@@ -87,6 +90,79 @@ def _get_context_from_config():
 set_context(_get_context_from_config())
 
 
+def create_pom_from_config():
+    config = get_config()
+    pom = pom_template()
+    dl4j_version = config['dl4j_version']
+    nd4j_backend = config['nd4j_backend']
+    use_spark = config['spark']
+    scala_version = config['scala_version']
+    spark_version = config['spark_version']
+    use_dl4j_core = config['dl4j_core']
+    use_datavec = config['datavec']
+
+    datavec_deps = datavec_dependencies() if use_datavec else ""
+    pom =pom.replace('{datavec.dependencies}', datavec_deps)
+
+    core_deps = dl4j_core_dependencies() if use_dl4j_core else ""
+    pom = pom.replace('{dl4j.core.dependencies}', core_deps)
+
+    spark_deps = spark_dependencies() if use_spark else ""
+    pom = pom.replace('{spark.dependencies}', spark_deps)
+
+    pom = pom.replace('{dl4j.version}', dl4j_version)
+
+    if nd4j_backend == 'cpu':
+        backend = "nd4j-native"
+    else:
+        backend = "nd4j-cuda-9.2-platform"
+    pom = pom.replace('{nd4j.backend}', backend)
+
+    if use_spark:
+        pom = pom.replace('{scala.binary.version}', scala_version)
+        # this naming convention seems a little off
+        if "SNAPSHOT" in dl4j_version:
+            dl4j_version = dl4j_version.replace("-SNAPSHOT", "")
+            dl4j_spark_version = dl4j_version + "_spark_" + spark_version + "-SNAPSHOT"
+        else:
+            dl4j_spark_version = dl4j_version + "_spark_" + spark_version
+        pom = pom.replace('{dl4j.spark.version}', dl4j_spark_version)
+    
+    # TODO replace if exists
+    pom_xml = os.path.join(_MY_DIR, 'pom.xml')
+    with open(pom_xml, 'w') as pom_file:
+        pom_file.write(pom)
+
+
+def docker_build():
+    docker_path = os.path.join(_MY_DIR, 'Dockerfile')
+    docker_string = docker_file()
+    with open(docker_path, 'w') as f:
+        f.write(docker_string)
+
+    call(["sudo", "docker", "build", _MY_DIR, "-t", "pydl4j"])
+
+
+def docker_run():
+    create_pom_from_config()
+    call(["sudo", "docker", "run", "--mount", "src=" + _MY_DIR + ",target=/app,type=bind", "pydl4j"])
+    # docker will build into <context>/target, need to move to context dir
+    context_dir = get_dir()
+    config = get_config()
+    dl4j_version = config['dl4j_version']
+    jar_name = "pydl4j-{}-bin.jar".format(dl4j_version)
+    base_target_dir = os.path.join(_MY_DIR, "target")
+    source = os.path.join(base_target_dir, jar_name)
+    target = os.path.join(context_dir, jar_name)
+    # os.rename or shutil won't work in all cases, need to assume sudo role
+    call(["sudo", "mv", source, target])
+
+
+def install_from_docker():
+    docker_build()
+    docker_run()
+
+
 def install_docker_jars():
     jars = get_jars()
     dl4j_version = _CONFIG['dl4j_version']
@@ -147,3 +223,5 @@ def set_jnius_config():
         warnings.warn('Pyjnius not installed.')
 
 set_jnius_config()
+
+
