@@ -10,10 +10,14 @@ def mkdir(x):
 		os.mkdir(x)
 
 
+
+
 _CONTEXT_NAME = None
 _CONTEXT_DIR = None
 _USER_PATH = os.path.expanduser('~')
-_MY_DIR = os.path.join(_USER_PATH, '.pydl4j')
+_DL4J_DIR = os.path.join(_USER_PATH, '.deeplearning4j')
+mkdir(_DL4J_DIR)
+_MY_DIR = os.path.join(_DL4J_DIR, 'pydl4j')
 mkdir(_MY_DIR)
 
 _URLS_FILE = os.path.join(_MY_DIR, 'urls.json')
@@ -84,15 +88,13 @@ def install(url, jar_name=None):
     if not jar_name:
         jar_name = os.path.basename(url)
     jar_path = os.path.join(_CONTEXT_DIR, jar_name)
+    temp_jar_path = jar_path + '.tmp'
+    if os.path.isfile(temp_jar_path):
+        os.remove(temp_jar_path)
+    download_file(url, temp_jar_path)
     if os.path.isfile(jar_path):
-        temp_jar_path = jar_path + '.tmp'
-        if os.path.isfile(temp_jar_path):
-            os.remove(temp_jar_path)
-        download_file(url, temp_jar_path)
         os.remove(jar_path)
-        os.rename(temp_jar_path, jar_path)
-    else:
-        download_file(url, jar_path)
+    os.rename(temp_jar_path, jar_path)
     if _CONTEXT_NAME not in _URLS:
         _URLS[_CONTEXT_NAME] = {jar_name: url}
     else:
