@@ -243,4 +243,13 @@ def set_jnius_config():
     except ImportError:
         warnings.warn('Pyjnius not installed.')
 
+
+def add_classpath(path):
+    try:
+        import jnius_config
+        jnius_config.add_classpath(path)
+    except ImportError:
+        warnings.warn('Pyjnius not installed.') 
+
+
 set_jnius_config()
