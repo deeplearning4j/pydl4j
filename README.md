@@ -39,7 +39,7 @@ mvn.get_artifacts(group_id)
 ```
 ##### Example:
 ```python
-mvn.get_atrifacts('datavec')
+mvn.get_artifacts('datavec')
 ```
 ```
 ['datavec-api', 'datavec-arrow', 'datavec-camel', 'datavec-cli', 'datavec-data', 'datavec-data-audio', 'datavec-data-codec', 'datavec-d
