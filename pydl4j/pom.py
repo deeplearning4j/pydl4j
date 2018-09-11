@@ -101,6 +101,9 @@ def pom_template():
 
     <properties>
         <maven-shade-plugin.version>3.0.0</maven-shade-plugin.version>
+        <javacpp.version>1.4.3-SNAPSHOT</javacpp.version>
+        <javacpp-presets.version>1.4.2</javacpp-presets.version>
+        <openblas.version>0.3.0</openblas.version>
     </properties>
 
     <licenses>
@@ -113,13 +116,35 @@ def pom_template():
 
     <dependencies>
         <dependency>
+            <groupId>org.bytedeco.javacpp-presets</groupId>
+            <artifactId>openblas-platform</artifactId>
+            <version>${openblas.version}-${javacpp-presets.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>{nd4j.platform.backend}</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>{nd4j.backend}</artifactId>
             <version>${project.version}</version>
+            <classifier>linux-x86_64</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>{nd4j.backend}</artifactId>
+            <version>${project.version}</version>
+            <classifier>windows-x86_64</classifier>
         </dependency>
         {dl4j.core.dependencies}
         {spark.dependencies}
         {datavec.dependencies}
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+        </dependency>
     </dependencies>
 
     <repositories>

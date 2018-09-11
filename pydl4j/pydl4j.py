@@ -113,10 +113,14 @@ def create_pom_from_config():
     pom = pom.replace('{dl4j.version}', dl4j_version)
 
     if nd4j_backend == 'cpu':
+        platform_backend = "nd4j-native-platform"
         backend = "nd4j-native"
     else:
-        backend = "nd4j-cuda-9.2-platform"
+        platform_backend = "nd4j-cuda-9.2-platform"
+        platform_backend = "nd4j-cuda-9.2"
+
     pom = pom.replace('{nd4j.backend}', backend)
+    pom = pom.replace('{nd4j.platform.backend}', platform_backend)
 
     if use_spark:
         pom = pom.replace('{scala.binary.version}', scala_version)
@@ -168,8 +172,8 @@ def install_docker_jars():
     dl4j_version = _CONFIG['dl4j_version']
     jar_name = "pydl4j-{}-bin.jar".format(dl4j_version)
     jar = os.path.join(get_dir(), jar_name)
-    #if not jar in jars:
-     #   install_from_docker()
+    if not jar in jars:
+       install_from_docker()
 
 
 def _nd4j_jars():
@@ -202,8 +206,12 @@ def _validate_jars(jars):
                 break
         if not found:
             print('pydl4j: Required jar not installed {}.'.format(v[1]))
-            install(v[0], v[1])
-            # TODO : Handover to docker/mvn for configs not available as uberjars
+            config = get_config()
+            # TODO: do we need other checks here?
+            if config['nd4j_backend'] != 'gpu' or config['dl4j_version'] != '1.0.0-SNAPSHOT':
+                install_docker_jars()
+            else:
+                install(v[0], v[1])
 
 
 def _install_jars(jars):  # Note: downloads even if already installed.
@@ -234,5 +242,14 @@ def set_jnius_config():
     # Further options can be set by individual projects
     except ImportError:
         warnings.warn('Pyjnius not installed.')
+
+
+def add_classpath(path):
+    try:
+        import jnius_config
+        jnius_config.add_classpath(path)
+    except ImportError:
+        warnings.warn('Pyjnius not installed.') 
+
 
 set_jnius_config()
