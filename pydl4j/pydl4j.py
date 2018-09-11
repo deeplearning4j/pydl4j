@@ -168,8 +168,8 @@ def install_docker_jars():
     dl4j_version = _CONFIG['dl4j_version']
     jar_name = "pydl4j-{}-bin.jar".format(dl4j_version)
     jar = os.path.join(get_dir(), jar_name)
-    #if not jar in jars:
-     #   install_from_docker()
+    if not jar in jars:
+       install_from_docker()
 
 
 def _nd4j_jars():
@@ -202,8 +202,12 @@ def _validate_jars(jars):
                 break
         if not found:
             print('pydl4j: Required jar not installed {}.'.format(v[1]))
-            install(v[0], v[1])
-            # TODO : Handover to docker/mvn for configs not available as uberjars
+            config = get_config()
+            # TODO: do we need other checks here?
+            if config['nd4j_backend'] != 'gpu' or config['dl4j_version'] != '1.0.0-SNAPSHOT':
+                install_docker_jars()
+            else:
+                install(v[0], v[1])
 
 
 def _install_jars(jars):  # Note: downloads even if already installed.
