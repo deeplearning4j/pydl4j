@@ -3,9 +3,9 @@ from setuptools import find_packages
 
 setup(
     name='pydl4j',
-    version=0.1,
+    version='0.1.1',
     packages=find_packages(),
-    install_requires=[],
+    install_requires=['jnius'],
     include_package_data=True,
     license='MIT',
     description='Java dependency management for Python projects using DL4J',
