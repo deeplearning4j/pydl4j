@@ -10,6 +10,10 @@ can use PyDL4J for the following tasks:
 
 ---------
 
+[![Build Status](https://travis-ci.org/deeplearning4j/pydl4j.svg?branch=master)](https://travis-ci.org/deeplearning4j/pydl4j)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/deeplearning4j/pydl4j/blob/master/LICENSE)
+[![PyPI version](https://badge.fury.io/py/pydl4j.svg)](https://badge.fury.io/py/pydl4j)
+
 ## Installation
 
 PyDL4J is on PyPI, so you can install it with `pip`:
