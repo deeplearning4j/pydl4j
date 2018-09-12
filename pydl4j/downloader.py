@@ -43,7 +43,8 @@ def download(url, file_name):
             os.remove(file_name)
     if not file_exists:
         factor = int(math.floor(math.log(file_size)/math.log(1024)))
-        display_file_size = str(file_size / 1024 ** factor) + ['B','KB','MB','GB','TB','PB'][factor]
+        display_file_size = str(file_size / 1024 ** factor) + \
+            ['B', 'KB', 'MB', 'GB', 'TB', 'PB'][factor]
         print("Source: " + url)
         print("Destination " + file_name)
         print("Size: " + display_file_size)
@@ -60,7 +61,7 @@ def download(url, file_name):
             pbar.update(chunk_size)
             #status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
             #status = status + chr(8)*(len(status)+1)
-            #print(status)
+            # print(status)
         f.close()
     else:
         print("File already exists - " + file_name)
