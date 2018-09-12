@@ -6,6 +6,7 @@ import math
 def _mean(x):
     return float(sum(x)) / len(x)
 
+
 class ProgressBar(object):
     """Displays a progress bar.
 
@@ -81,7 +82,8 @@ class ProgressBar(object):
             for k in self.unique_values:
                 info += ' - %s:' % k
                 if isinstance(self.sum_values[k], list):
-                    avg = _mean(self.sum_values[k][0] / max(1, self.sum_values[k][1]))
+                    avg = _mean(
+                        self.sum_values[k][0] / max(1, self.sum_values[k][1]))
                     if abs(avg) > 1e-3:
                         info += ' %.4f' % avg
                     else:
@@ -104,7 +106,8 @@ class ProgressBar(object):
                 info = '%ds' % (now - self.start)
                 for k in self.unique_values:
                     info += ' - %s:' % k
-                    avg = _mean(self.sum_values[k][0] / max(1, self.sum_values[k][1]))
+                    avg = _mean(
+                        self.sum_values[k][0] / max(1, self.sum_values[k][1]))
                     if avg > 1e-3:
                         info += ' %.4f' % avg
                     else:

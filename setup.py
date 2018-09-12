@@ -5,7 +5,10 @@ setup(
     name='pydl4j',
     version='0.1.1',
     packages=find_packages(),
-    install_requires=['jnius'],
+    install_requires=['Cython', 'jnius', 'requests'],
+    extras_require={
+        'tests': ['pytest','pytest-pep8','pytest-cov']
+        },
     include_package_data=True,
     license='MIT',
     description='Java dependency management for Python projects using DL4J',
@@ -16,6 +19,8 @@ setup(
         ]
     },
     classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: Developers',
         'Environment :: Console',
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',

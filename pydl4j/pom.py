@@ -13,6 +13,7 @@ def spark_dependencies():
             <version>{dl4j.spark.version}</version>
         </dependency>"""
 
+
 def datavec_dependencies():
     return """<dependency>
             <groupId>org.datavec</groupId>
@@ -53,7 +54,7 @@ def datavec_dependencies():
             <groupId>org.datavec</groupId>
             <artifactId>datavec-perf</artifactId>
             <version>${project.version}</version>
-        </dependency> 
+        </dependency>
         <dependency>
             <groupId>org.datavec</groupId>
             <artifactId>datavec-spark_{scala.binary.version}</artifactId>
@@ -65,7 +66,6 @@ def datavec_dependencies():
             <version>${project.version}</version>
         </dependency> -->
 """
-    
 
 
 def pom_template():

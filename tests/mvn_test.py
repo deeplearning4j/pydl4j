@@ -1,5 +1,5 @@
 import pytest
-import pydl4j import *
+from pydl4j import *
 
 
 def test_get_artifacts():
@@ -29,7 +29,6 @@ def test_install():
         uninstall(jar)
     assert len(get_jars()) == 0
     clear_context()
-
 
 
 if __name__ == '__main__':

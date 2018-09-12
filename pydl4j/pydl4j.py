@@ -24,7 +24,6 @@ def get_os():
 _CONFIG_FILE = os.path.join(_MY_DIR, 'config.json')
 
 
-
 # Default config
 _CONFIG = {
     'dl4j_version': '1.0.0-SNAPSHOT',
@@ -39,7 +38,8 @@ _CONFIG = {
 
 def _write_config():
     with open(_CONFIG_FILE, 'w') as f:
-        json.dump(_CONFIG, f)    
+        json.dump(_CONFIG, f)
+
 
 if os.path.isfile(_CONFIG_FILE):
     with open(_CONFIG_FILE, 'r') as f:
@@ -70,11 +70,13 @@ def validate_config(config=None):
         if v is None:
             raise KeyError('Key not found in config : {}.'.format(k))
         if v not in vs:
-            raise ValueError('Invalid value {} for key {} in config. Valid values are: {}.'.format(v, k, vs))
+            raise ValueError(
+                'Invalid value {} for key {} in config. Valid values are: {}.'.format(v, k, vs))
 
     # spark 2 does not work with scala 2.10
     if config['spark_version'] == '2' and config['scala_version'] == '2.10':
-        raise ValueError('Scala 2.10 does not work with spark 2. Set scala_version to 2.11 in pydl4j config. ')
+        raise ValueError(
+            'Scala 2.10 does not work with spark 2. Set scala_version to 2.11 in pydl4j config. ')
 
 
 def _get_context_from_config():
@@ -102,7 +104,7 @@ def create_pom_from_config():
     use_datavec = config['datavec']
 
     datavec_deps = datavec_dependencies() if use_datavec else ""
-    pom =pom.replace('{datavec.dependencies}', datavec_deps)
+    pom = pom.replace('{datavec.dependencies}', datavec_deps)
 
     core_deps = dl4j_core_dependencies() if use_dl4j_core else ""
     pom = pom.replace('{dl4j.core.dependencies}', core_deps)
@@ -131,7 +133,7 @@ def create_pom_from_config():
         else:
             dl4j_spark_version = dl4j_version + "_spark_" + spark_version
         pom = pom.replace('{dl4j.spark.version}', dl4j_spark_version)
-    
+
     # TODO replace if exists
     pom_xml = os.path.join(_MY_DIR, 'pom.xml')
     with open(pom_xml, 'w') as pom_file:
@@ -149,7 +151,8 @@ def docker_build():
 
 def docker_run():
     create_pom_from_config()
-    call(["sudo", "docker", "run", "--mount", "src=" + _MY_DIR + ",target=/app,type=bind", "pydl4j"])
+    call(["sudo", "docker", "run", "--mount", "src=" +
+          _MY_DIR + ",target=/app,type=bind", "pydl4j"])
     # docker will build into <context>/target, need to move to context dir
     context_dir = get_dir()
     config = get_config()
@@ -171,7 +174,7 @@ def install_docker_jars():
     jars = get_jars()
     dl4j_version = _CONFIG['dl4j_version']
     jar = "pydl4j-{}-bin.jar".format(dl4j_version)
-    if not jar in jars:
+    if jar not in jars:
         print("pdl4j: required uberjar not found, building with docker...")
         install_from_docker()
     else:
@@ -181,8 +184,11 @@ def install_docker_jars():
 def _nd4j_jars():
     url = 'https://deeplearning4jblob.blob.core.windows.net/jars/'
     base_name = 'nd4j-uberjar'
-    version = '1.0.0-SNAPSHOT'  # uploaded uber jar version. Version installed using docker can be different.
-    jar_url = url + '{}-{}-{}-{}-no_avx.jar'.format(base_name, version, get_os(), _CONFIG['nd4j_backend'])
+    # uploaded uber jar version. Version installed using docker can be different.
+    version = '1.0.0-SNAPSHOT'
+    jar_url = url + \
+        '{}-{}-{}-{}-no_avx.jar'.format(base_name,
+                                        version, get_os(), _CONFIG['nd4j_backend'])
     jar_name = '{}-{}.jar'.format(base_name, version)
     return {base_name: [jar_url, jar_name]}
 
@@ -193,7 +199,8 @@ def _datavec_jars():
     version = '1.0.0-SNAPSHOT'
     spark_v = _CONFIG['spark_version']
     scala_v = _CONFIG['scala_version']
-    jar_url = url + base_name + '-{}-spark{}-{}.jar'.format(version, spark_v, scala_v)
+    jar_url = url + base_name + \
+        '-{}-spark{}-{}.jar'.format(version, spark_v, scala_v)
     jar_name = '{}-{}.jar'.format(base_name, version)
     return {base_name: [jar_url, jar_name]}
 
@@ -218,7 +225,7 @@ def _validate_jars(jars):
 
 def _install_jars(jars):  # Note: downloads even if already installed.
     for v in jars.values():
-        install(v[0], v[1])    
+        install(v[0], v[1])
 
 
 def install_nd4j_jars():
@@ -230,7 +237,7 @@ def validate_nd4j_jars():
 
 
 def install_datavec_jars():
-    _install_jars(_datavec_jars())  
+    _install_jars(_datavec_jars())
 
 
 def validate_datavec_jars():
@@ -251,7 +258,7 @@ def add_classpath(path):
         import jnius_config
         jnius_config.add_classpath(path)
     except ImportError:
-        warnings.warn('Pyjnius not installed.') 
+        warnings.warn('Pyjnius not installed.')
 
 
 set_jnius_config()

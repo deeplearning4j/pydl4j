@@ -6,10 +6,8 @@ import os
 
 
 def mkdir(x):
-	if not os.path.isdir(x):
-		os.mkdir(x)
-
-
+    if not os.path.isdir(x):
+        os.mkdir(x)
 
 
 _CONTEXT_NAME = None
@@ -27,11 +25,15 @@ if os.path.isfile(_URLS_FILE):
 else:
     _URLS = {}
 
+
 def _write_urls():
     with open(_URLS_FILE, 'w') as f:
         json.dump(_URLS, f)
 
+
 _cache = {}
+
+
 def _read(url):
     text = _cache.get(url)
     if text is None:
@@ -49,17 +51,19 @@ def _parse_contents(text):
     _ = contents.pop(0)
     link_to_parent = contents.pop(0)
     contents = list(map(lambda x: x.split('"')[0], contents))
-    contents = [c[:-1] for c in contents if c[-1] == '/']  # removes meta data files
+    contents = [c[:-1]
+                for c in contents if c[-1] == '/']  # removes meta data files
     return contents
 
 
 def check(f):
     def wrapper(*args, **kwargs):
         if _CONTEXT_NAME is None:
-            raise Exception('Context not set! Set context using pydl4j.set_context()')
+            raise Exception(
+                'Context not set! Set context using pydl4j.set_context()')
         mkdir(_CONTEXT_DIR)
         return f(*args, **kwargs)
-    return wrapper    
+    return wrapper
 
 
 def set_context(name):
@@ -110,6 +114,7 @@ def mvn_install(group, artifact, version=None):
               'Installing latest version: {}.'.format(group, artifact, version))
     url = get_jar_url(group, artifact, version)
     install(url)
+
 
 @check
 def uninstall(artifact, version=None):
