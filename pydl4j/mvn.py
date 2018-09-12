@@ -3,6 +3,8 @@ import requests
 
 
 _cache = {}
+
+
 def _read(url):
     text = _cache.get(url)
     if text is None:
@@ -24,17 +26,16 @@ def _parse_contents(text):
     return contents
 
 
-
 def get_artifacts(group):
     url = ('https://search.maven.org/remotecontent?filepath=' +
-          'org/{}/'.format(group))
+           'org/{}/'.format(group))
     response = _read(url)
     return _parse_contents(response)
 
 
 def get_versions(group, artifact):
     url = ('https://search.maven.org/remotecontent?filepath=' +
-          'org/{}/{}/'.format(group, artifact))
+           'org/{}/{}/'.format(group, artifact))
     response = _read(url)
     return _parse_contents(response)
 
@@ -46,7 +47,7 @@ def get_latest_version(group, artifact):
 def get_jar_url(group, artifact, version=None):
     if version is None:
         version = get_versions(group, artifact)[-1]
-    url = ('http://search.maven.org/remotecontent?filepath=' + 
-          'org/{}/{}/{}/{}-{}.jar'.format(group, artifact, version,
-                                          artifact, version))
+    url = ('http://search.maven.org/remotecontent?filepath=' +
+           'org/{}/{}/{}/{}-{}.jar'.format(group, artifact, version,
+                                           artifact, version))
     return url

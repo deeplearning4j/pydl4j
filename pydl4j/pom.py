@@ -54,7 +54,7 @@ def datavec_dependencies():
             <groupId>org.datavec</groupId>
             <artifactId>datavec-perf</artifactId>
             <version>${project.version}</version>
-        </dependency> 
+        </dependency>
         <dependency>
             <groupId>org.datavec</groupId>
             <artifactId>datavec-spark_{scala.binary.version}</artifactId>

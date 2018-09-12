@@ -31,6 +31,5 @@ def test_install():
     clear_context()
 
 
-
 if __name__ == '__main__':
     pytest.main([__file__])

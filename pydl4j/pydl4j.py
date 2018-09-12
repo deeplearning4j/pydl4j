@@ -174,7 +174,7 @@ def install_docker_jars():
     jars = get_jars()
     dl4j_version = _CONFIG['dl4j_version']
     jar = "pydl4j-{}-bin.jar".format(dl4j_version)
-    if not jar in jars:
+    if jar not in jars:
         print("pdl4j: required uberjar not found, building with docker...")
         install_from_docker()
     else:
