@@ -7,8 +7,8 @@ setup(
     packages=find_packages(),
     install_requires=['Cython', 'jnius', 'requests'],
     extras_require={
-        'tests': ['pytest','pytest-pep8','pytest-cov']
-        },
+        'tests': ['pytest', 'pytest-pep8', 'pytest-cov']
+    },
     include_package_data=True,
     license='MIT',
     description='Java dependency management for Python projects using DL4J',
