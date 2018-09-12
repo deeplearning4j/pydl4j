@@ -1,5 +1,5 @@
 import pytest
-import pydl4j import *
+from pydl4j import *
 
 
 def test_get_artifacts():
