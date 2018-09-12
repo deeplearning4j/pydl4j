@@ -13,7 +13,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 ################################################################################
- 
+
 
 def docker_file():
     return """FROM java:openjdk-8-jdk

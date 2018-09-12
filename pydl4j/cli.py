@@ -1,3 +1,5 @@
+#!/usr/bin python
+# -*- coding: utf-8 -*-
 ################################################################################
 # Copyright (c) 2015-2018 Skymind, Inc.
 #
@@ -13,8 +15,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 ################################################################################
-#!/usr/bin python
-# -*- coding: utf-8 -*-
 
 import argparse
 import json
