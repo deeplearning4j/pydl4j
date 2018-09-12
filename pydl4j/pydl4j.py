@@ -216,11 +216,10 @@ def _validate_jars(jars):
         if not found:
             print('pydl4j: Required jar not installed {}.'.format(v[1]))
             config = get_config()
-            # TODO: do we need other checks here?
-            if config['nd4j_backend'] != 'gpu' or config['dl4j_version'] != '1.0.0-SNAPSHOT':
-                install_docker_jars()
-            else:
+            if config['nd4j_backend'] == 'cpu' and config['dl4j_version'] == '1.0.0-SNAPSHOT' and get_os() != 'mac':
                 install(v[0], v[1])
+            else:
+                install_docker_jars()
 
 
 def _install_jars(jars):  # Note: downloads even if already installed.

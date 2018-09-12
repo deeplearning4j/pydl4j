@@ -17,11 +17,10 @@ from dateutil import parser
 
 from .pydl4j import set_config, get_config, install_from_docker
 from .pydl4j import validate_config
-# from .pydl4j import install_docker_jars
 
 _CONFIG = get_config()
 
-DEFAULT_DL4J_VERSION = '1.0.0-beta2'  # doesn't currently work with snapshots :/
+DEFAULT_DL4J_VERSION = _CONFIG['dl4j_version']
 DEFAULT_BACKEND = _CONFIG['nd4j_backend']
 DEFAULT_DATAVEC = _CONFIG['datavec']
 DEFAULT_SPARK = _CONFIG['spark']
