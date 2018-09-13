@@ -267,7 +267,6 @@ def install_from_docker():
             os.rename(source, target)
         else:
             call(["sudo", "mv", source, target])
-        
 
 
 def install_docker_jars():
@@ -332,7 +331,7 @@ def _validate_jars(jars):
             config = get_config()
             if config['nd4j_backend'] == 'cpu' and config['dl4j_version'] == '1.0.0-SNAPSHOT':
                 install_docker_jars()
-                #install(v[0], v[1])  # Disabled for now. Issues with spark.
+                'install(v[0], v[1])  # Disabled for now. Issues with spark.
             else:
                 install_docker_jars()
 
