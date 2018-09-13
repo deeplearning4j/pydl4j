@@ -21,19 +21,15 @@ import platform
 import os
 import warnings
 import os
-from subprocess import call
+from subprocess import call as py_call
+import json
 
 
-def get_os():
-    osname = platform.system()
-    os_map = {
-        'Windows': 'windows',
-        'Linux': 'linux',
-        'Darwin': 'mac'
-    }
-    if osname not in os_map:
-        raise ValueError('{} platform is not supported.'.format(osname))
-    return os_map[osname]
+def call(arglist):
+    if os.name == 'nt':
+        if arglist[0] == 'sudo':
+            arglist.pop(0)
+    return py_call(arglist)
 
 
 _CONFIG_FILE = os.path.join(_MY_DIR, 'config.json')
@@ -51,8 +47,32 @@ _CONFIG = {
 }
 
 
-def _write_config():
-    with open(_CONFIG_FILE, 'w') as f:
+def _is_sub_set(config1, config2):
+    # check if config1 is a subset of config2
+    # if config1 < config2, then we can use config2 jar
+    # for config1 as well
+    if config1['dl4j_version'] != config1['dl4j_version']:
+        return False
+    if config1['dl4j_core'] > config2['dl4j_core']:
+        return False
+    if config1['nd4j_backend'] != config2['nd4j_backend']:
+        return False
+    if config1['datavec']:
+        if not config2['datavec']:
+            return False
+        if config1['spark'] > config2['spark']:
+            return False
+        if config1['spark_version'] != config2['spark_version']:
+            return False
+        if config1['scala_version'] != config2['scala_version']:
+            return False
+    return True
+
+
+def _write_config(filepath=None):
+    if not filepath:
+        filepath = _CONFIG_FILE
+    with open(filepath, 'w') as f:
         json.dump(_CONFIG, f)
 
 
@@ -94,14 +114,53 @@ def validate_config(config=None):
             'Scala 2.10 does not work with spark 2. Set scala_version to 2.11 in pydl4j config. ')
 
 
-def _get_context_from_config():
-    # e.g pydl4j-1.0.0-SNAPSHOT-cpu-spark2-2.11
-    context = 'pydl4j-{}-{}-spark{}-{}'.format(
-        _CONFIG['dl4j_version'],
-        _CONFIG['nd4j_backend'],
-        _CONFIG['spark_version'],
-        _CONFIG['scala_version'])
+def _get_context_from_config(config=None):
+    if not config:
+        config = _CONFIG
+    # e.g pydl4j-1.0.0-SNAPSHOT-cpu-core-datavec-spark2-2.11
+
+    context = 'pydl4j-{}'.format(config['dl4j_version'])
+    context += '-' + config['nd4j_backend']
+    if config['dl4j_core']:
+        context += '-core'
+    if config['datavec']:
+        context += '-datavec'
+        if config['spark']:
+            spark_version = config['spark_version']
+            scala_version = config['scala_version']
+            context += '-spark' + spark_version + '-' + scala_version
     return context
+
+
+def _get_config_from_context(context):
+    config = {}
+    backends = ['cpu', 'gpu']
+    for b in backends:
+        if '-' + b in context:
+            config['nd4j_backend'] = b
+            config['dl4j_version'] = context.split('-' + b)[0][len('pydl4j-'):]
+            break
+    config['dl4j_core'] = '-core' in context
+    set_defs = False
+    if '-datavec' in context:
+        config['datavec'] = True
+        if '-spark' in context:
+            config['spark'] = True
+            sp_sc_ver = context.split('-spark')[1]
+            sp_ver, sc_ver = sp_sc_ver.split('-')
+            config['spark_version'] = sp_ver
+            config['scala_version'] = sc_ver
+        else:
+            config['spark'] = False
+            set_defs = True
+    else:
+        config['datavec'] = False
+        set_defs = True
+    if set_defs:
+        config['spark_version'] = '2'
+        config['scala_version'] = '2.11'
+    validate_config(config)
+    return config
 
 
 set_context(_get_context_from_config())
@@ -176,8 +235,13 @@ def docker_run():
     base_target_dir = os.path.join(_MY_DIR, "target")
     source = os.path.join(base_target_dir, jar_name)
     target = os.path.join(context_dir, jar_name)
+    _write_config(os.path.join(context_dir, 'config.json'))
+
     # os.rename or shutil won't work in all cases, need to assume sudo role
-    call(["sudo", "mv", source, target])
+    if os.name == 'nt':
+        os.rename(source, target)
+    else:
+        call(["sudo", "mv", source, target])
 
 
 def install_from_docker():
@@ -190,10 +254,21 @@ def install_docker_jars():
     dl4j_version = _CONFIG['dl4j_version']
     jar = "pydl4j-{}-bin.jar".format(dl4j_version)
     if jar not in jars:
-        print("pdl4j: required uberjar not found, building with docker...")
-        install_from_docker()
+        contexts = _get_all_contexts()
+        found_super_set_jar = False
+        for c in contexts:
+            config = _get_config_from_context(c)
+            if _is_sub_set(_CONFIG, config):
+                set_context(c)
+                jars = get_jars()
+                if jar in jars:
+                    found_super_set_jar = True
+                    break
+        if not found_super_set_jar:
+            print("pdl4j: required uberjar not found, building with docker...")
+            install_from_docker()
     else:
-        print("pydl4j: uberjar already available for given context, skip docker build")
+        print("pydl4j: uberjar already available for given context, skipping docker build.")
 
 
 def _nd4j_jars():
@@ -201,9 +276,12 @@ def _nd4j_jars():
     base_name = 'nd4j-uberjar'
     # uploaded uber jar version. Version installed using docker can be different.
     version = '1.0.0-SNAPSHOT'
+    b = _CONFIG['nd4j_backend']
+    if b == 'cpu':
+        b += '-no_avx'
     jar_url = url + \
-        '{}-{}-{}-{}-no_avx.jar'.format(base_name,
-                                        version, get_os(), _CONFIG['nd4j_backend'])
+        '{}-{}-{}.jar'.format(base_name,
+                              version, b)
     jar_name = '{}-{}.jar'.format(base_name, version)
     return {base_name: [jar_url, jar_name]}
 
@@ -231,7 +309,7 @@ def _validate_jars(jars):
         if not found:
             print('pydl4j: Required jar not installed {}.'.format(v[1]))
             config = get_config()
-            if config['nd4j_backend'] == 'cpu' and config['dl4j_version'] == '1.0.0-SNAPSHOT' and get_os() != 'mac':
+            if config['nd4j_backend'] == 'cpu' and config['dl4j_version'] == '1.0.0-SNAPSHOT':
                 install(v[0], v[1])
             else:
                 install_docker_jars()
@@ -256,6 +334,11 @@ def install_datavec_jars():
 
 def validate_datavec_jars():
     _validate_jars(_datavec_jars())
+
+
+def _get_all_contexts():
+    c = os.listdir(_MY_DIR)
+    return [x for x in c if x.startswith('pydl4j')]
 
 
 def set_jnius_config():
