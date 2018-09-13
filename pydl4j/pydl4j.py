@@ -29,7 +29,9 @@ def call(arglist):
     if os.name == 'nt':
         if arglist[0] == 'sudo':
             arglist.pop(0)
-    return py_call(arglist)
+    error = py_call(arglist)
+    if error:
+        raise Exception('Subprocess error for command : ' + arglist)
 
 
 _CONFIG_FILE = os.path.join(_MY_DIR, 'config.json')
@@ -245,8 +247,26 @@ def docker_run():
 
 
 def install_from_docker():
-    docker_build()
-    docker_run()
+    try:
+        docker_build()
+        docker_run()
+    except:
+        warnings.warn("Docker unavailable. Attempting alternate implementation.")
+        create_pom_from_config()
+        pom_xml = os.path.join(_MY_DIR, 'pom.xml')
+        command = 'mvn clean install -f ' + pom_xml
+        if os.name != 'nt':
+            command = 'sudo ' + command
+        os.system(command)
+        version = _CONFIG['dl4j_version']
+        jar_name = "pydl4j-{}-bin.jar".format(version)
+        source = os.path.join(_MY_DIR, 'target', jar_name)
+        target = os.path.join(get_dir(), jar_name)
+        # os.rename or shutil won't work in all cases, need to assume sudo role
+        if os.name == 'nt':
+            os.rename(source, target)
+        else:
+            call(["sudo", "mv", source, target])
 
 
 def install_docker_jars():
@@ -310,7 +330,8 @@ def _validate_jars(jars):
             print('pydl4j: Required jar not installed {}.'.format(v[1]))
             config = get_config()
             if config['nd4j_backend'] == 'cpu' and config['dl4j_version'] == '1.0.0-SNAPSHOT':
-                install(v[0], v[1])
+                install_docker_jars()
+                # install(v[0], v[1])  # Disabled for now. Issues with spark.
             else:
                 install_docker_jars()
 
