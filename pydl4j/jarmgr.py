@@ -101,11 +101,16 @@ def context():
 def get_dir():
     return _CONTEXT_DIR
 
-
 @check
 def install(url, jar_name=None):
     if not jar_name:
         jar_name = os.path.basename(url)
+    if os.path.isfile(url):
+        command = 'cp {} {}'.format(url, os.path.join(get_dir(), jar_name))
+        if os.name != 'nt':
+            command = 'sudo ' + command
+        os.system(command)
+        return
     jar_path = os.path.join(_CONTEXT_DIR, jar_name)
     temp_jar_path = jar_path + '.tmp'
     if os.path.isfile(temp_jar_path):
