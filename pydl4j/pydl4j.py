@@ -25,7 +25,6 @@ from subprocess import call as py_call
 import json
 
 
-
 def call(arglist):
     if os.name == nt:
         if arglist[0] == 'sudo':
@@ -69,8 +68,6 @@ def _is_sub_set(config1, config2):
             return False
     return True
 
-
-    
 
 def _write_config(filepath=None):
     if not filepath:
@@ -134,13 +131,14 @@ def _get_context_from_config(config=None):
             context += '-spark' + spark_version + '-' + scala_version
     return context
 
+
 def _get_config_from_context(context):
     config = {}
     backends = ['cpu', 'gpu']
     for b in backends:
         if '-' + b in context:
             config['nd4j_backend'] = b
-            config['dl4j_version']  = context.split('-' + b)[0][len('pydl4j-'):]
+            config['dl4j_version'] = context.split('-' + b)[0][len('pydl4j-'):]
             break
     if '-core' in context:
         config['dl4j_core'] = True
@@ -154,7 +152,7 @@ def _get_config_from_context(context):
             config['scala_version'] = sc_ver
     validate_config(config)
     return config
-    
+
 
 set_context(_get_context_from_config())
 
@@ -231,7 +229,7 @@ def docker_run():
     _write_config(os.path.join(context_dir, 'config.json'))
 
     # os.rename or shutil won't work in all cases, need to assume sudo role
-    if os.name == 'nt'':
+    if os.name == 'nt':
         os.rename(source, target)
     else:
         call(["sudo", "mv", source, target])
