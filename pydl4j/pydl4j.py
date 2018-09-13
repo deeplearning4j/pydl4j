@@ -21,20 +21,16 @@ import platform
 import os
 import warnings
 import os
-from subprocess import call
+from subprocess import call as py_call
 import json
 
 
-def get_os():
-    osname = platform.system()
-    os_map = {
-        'Windows': 'windows',
-        'Linux': 'linux',
-        'Darwin': 'mac'
-    }
-    if osname not in os_map:
-        raise ValueError('{} platform is not supported.'.format(osname))
-    return os_map[osname]
+
+def call(arglist):
+    if os.name == nt:
+        if arglist[0] == 'sudo':
+            arglist.pop(0)
+    return py_call(arglist)
 
 
 _CONFIG_FILE = os.path.join(_MY_DIR, 'config.json')
@@ -235,7 +231,7 @@ def docker_run():
     _write_config(os.path.join(context_dir, 'config.json'))
 
     # os.rename or shutil won't work in all cases, need to assume sudo role
-    if get_os() == 'windows':
+    if os.name == 'nt'':
         os.rename(source, target)
     else:
         call(["sudo", "mv", source, target])
@@ -273,9 +269,12 @@ def _nd4j_jars():
     base_name = 'nd4j-uberjar'
     # uploaded uber jar version. Version installed using docker can be different.
     version = '1.0.0-SNAPSHOT'
+    b = _CONFIG['nd4j_backend']
+    if b == 'cpu':
+        b += '-no_avx'
     jar_url = url + \
-        '{}-{}-{}-no_avx.jar'.format(base_name,
-                                        version, _CONFIG['nd4j_backend'])
+        '{}-{}-{}.jar'.format(base_name,
+                              version, b)
     jar_name = '{}-{}.jar'.format(base_name, version)
     return {base_name: [jar_url, jar_name]}
 
@@ -303,7 +302,7 @@ def _validate_jars(jars):
         if not found:
             print('pydl4j: Required jar not installed {}.'.format(v[1]))
             config = get_config()
-            if config['nd4j_backend'] == 'cpu' and config['dl4j_version'] == '1.0.0-SNAPSHOT' and get_os() != 'mac':
+            if config['nd4j_backend'] == 'cpu' and config['dl4j_version'] == '1.0.0-SNAPSHOT':
                 install(v[0], v[1])
             else:
                 install_docker_jars()
