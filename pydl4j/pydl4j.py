@@ -26,7 +26,7 @@ import json
 
 
 def call(arglist):
-    if os.name == nt:
+    if os.name == 'nt':
         if arglist[0] == 'sudo':
             arglist.pop(0)
     return py_call(arglist)
@@ -140,8 +140,8 @@ def _get_config_from_context(context):
             config['nd4j_backend'] = b
             config['dl4j_version'] = context.split('-' + b)[0][len('pydl4j-'):]
             break
-    if '-core' in context:
-        config['dl4j_core'] = True
+    config['dl4j_core'] = '-core' in context
+    set_defs = False
     if '-datavec' in context:
         config['datavec'] = True
         if '-spark' in context:
@@ -150,6 +150,15 @@ def _get_config_from_context(context):
             sp_ver, sc_ver = sp_sc_ver.split('-')
             config['spark_version'] = sp_ver
             config['scala_version'] = sc_ver
+        else:
+            config['spark'] = False
+            set_defs = True
+    else:
+        config['datavec'] = False
+        set_defs = True
+    if set_defs:
+        config['spark_version'] = '2'
+        config['scala_version'] = '2.11'
     validate_config(config)
     return config
 
