@@ -10,7 +10,7 @@ setup(
         'tests': ['pytest', 'pytest-pep8', 'pytest-cov']
     },
     include_package_data=True,
-    license='MIT',
+    license='Apache',
     description='Java dependency management for Python projects using DL4J',
     url='https://github.com/deeplearning4j/pydl4j',
     entry_points={
