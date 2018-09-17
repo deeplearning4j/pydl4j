@@ -36,10 +36,14 @@ def test_spark():
     StringToWritablesFunction = autoclass('org.datavec.spark.transform.misc.StringToWritablesFunction')
     WritablesToStringFunction = autoclass('org.datavec.spark.transform.misc.WritablesToStringFunction')
 
-
     spark_conf = SparkConf()
     spark_conf.setMaster('local[*]')
     spark_conf.setAppName('test')
+
+    spark_context = SparkContext(spark_conf)
+    source = 'basic_example.csv'
+    assert os.path.isfile(source)
+    string_data = spark_context.textFile(source)
 
 
 if __name__ == '__main__':
