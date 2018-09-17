@@ -82,11 +82,6 @@ def datavec_dependencies():
             <artifactId>datavec-spark_{scala.binary.version}</artifactId>
             <version>{dl4j.spark.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.datavec</groupId>
-            <artifactId>datavec-spark-inference-parent</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 """
 
 
