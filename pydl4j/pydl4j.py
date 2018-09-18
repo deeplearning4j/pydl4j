@@ -274,6 +274,7 @@ def install_docker_jars():
     dl4j_version = _CONFIG['dl4j_version']
     jar = "pydl4j-{}-bin.jar".format(dl4j_version)
     if jar not in jars:
+        original_context = context()
         contexts = _get_all_contexts()
         found_super_set_jar = False
         for c in contexts:
@@ -285,6 +286,7 @@ def install_docker_jars():
                     found_super_set_jar = True
                     break
         if not found_super_set_jar:
+            set_context(original_context)
             print("pdl4j: required uberjar not found, building with docker...")
             install_from_docker()
     else:
@@ -354,6 +356,11 @@ def install_datavec_jars():
 
 
 def validate_datavec_jars():
+    if not _CONFIG['datavec']:
+        _CONFIG['datavec'] = True
+        _write_config()
+        context = _get_context_from_config()
+        set_context(context)
     _validate_jars(_datavec_jars())
 
 

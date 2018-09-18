@@ -24,14 +24,17 @@ import pkg_resources
 import argcomplete
 import traceback
 import subprocess
-from builtins import input
-
 import click
 from click.exceptions import ClickException
 from dateutil import parser
 
 from .pydl4j import set_config, get_config, install_from_docker
 from .pydl4j import validate_config
+
+
+if sys.version_info[0] == 2:
+    input = raw_input
+
 
 _CONFIG = get_config()
 
