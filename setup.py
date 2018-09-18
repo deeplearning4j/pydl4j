@@ -5,7 +5,8 @@ setup(
     name='pydl4j',
     version='0.1.1',
     packages=find_packages(),
-    install_requires=['Cython', 'jnius', 'requests'],
+    install_requires=['Cython', 'jnius', 'requests',
+                      'click', 'argcomplete', 'python-dateutil'],
     extras_require={
         'tests': ['pytest', 'pytest-pep8', 'pytest-cov']
     },
