@@ -10,7 +10,7 @@ can use PyDL4J for the following tasks:
 
 ---------
 
-[![Build Status](https://travis-ci.org/deeplearning4j/pydl4j.svg?branch=master)](https://travis-ci.org/deeplearning4j/pydl4j)
+[![Build Status](https://jenkins.ci.skymind.io/buildStatus/icon?job=deeplearing4j/pydl4j/master)](https://jenkins.ci.skymind.io/blue/organizations/jenkins/deeplearing4j%2Fpydl4j/activity)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/deeplearning4j/pydl4j/blob/master/LICENSE)
 [![PyPI version](https://badge.fury.io/py/pydl4j.svg)](https://badge.fury.io/py/pydl4j)
 
