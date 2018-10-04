@@ -227,7 +227,7 @@ def docker_build():
 
 def docker_run():
     create_pom_from_config()
-    call(["sudo", "docker", "run", "--mount", "src=" +
+    py_call(["sudo", "docker", "run", "--mount", "src=" +
           _MY_DIR + ",target=/app,type=bind", "pydl4j"])
     # docker will build into <context>/target, need to move to context dir
     context_dir = get_dir()
@@ -246,12 +246,20 @@ def docker_run():
         call(["sudo", "mv", source, target])
 
 
-def install_from_docker():
+def is_docker_available():
+    devnull = open(os.devnull, 'w')
     try:
+        py_call(["docker", "--help"], stdout=devnull, stderr=devnull)
+        return True
+    except:
+        return False
+
+
+def _maven_build(use_docker):
+    if use_docker:
         docker_build()
         docker_run()
-    except:
-        warnings.warn("Docker unavailable. Attempting alternate implementation.")
+    else:
         create_pom_from_config()
         pom_xml = os.path.join(_MY_DIR, 'pom.xml')
         command = 'mvn clean install -f ' + pom_xml
@@ -269,11 +277,27 @@ def install_from_docker():
             call(["sudo", "mv", source, target])
 
 
-def install_docker_jars():
+def maven_build():
+    if is_docker_available():
+        print("Docker available. Starting build...")
+        _maven_build(use_docker=True)
+    else:
+        warnings.warn("Docker unavailable. Attempting alternate implementation.")
+        _maven_build(use_docker=False)
+
+      
+
+
+def validate_jars():
+    # builds jar if not available for given context 
     jars = get_jars()
     dl4j_version = _CONFIG['dl4j_version']
     jar = "pydl4j-{}-bin.jar".format(dl4j_version)
     if jar not in jars:
+        # jar not found
+        # but its possible a jar exists in a different 
+        # context. If that context is a "super set" of
+        # of the current one, we can use its jar!
         original_context = context()
         contexts = _get_all_contexts()
         found_super_set_jar = False
@@ -288,71 +312,11 @@ def install_docker_jars():
         if not found_super_set_jar:
             set_context(original_context)
             print("pdl4j: required uberjar not found, building with docker...")
-            install_from_docker()
-    else:
-        print("pydl4j: uberjar already available for given context, skipping docker build.")
-
-
-def _nd4j_jars():
-    url = 'https://deeplearning4jblob.blob.core.windows.net/jars/'
-    base_name = 'nd4j-uberjar'
-    # uploaded uber jar version. Version installed using docker can be different.
-    version = '1.0.0-SNAPSHOT'
-    b = _CONFIG['nd4j_backend']
-    if b == 'cpu':
-        b += '-no_avx'
-    jar_url = url + \
-        '{}-{}-{}.jar'.format(base_name,
-                              version, b)
-    jar_name = '{}-{}.jar'.format(base_name, version)
-    return {base_name: [jar_url, jar_name]}
-
-
-def _datavec_jars():
-    url = 'https://deeplearning4jblob.blob.core.windows.net/jars/'
-    base_name = 'datavec-uberjar'
-    version = '1.0.0-SNAPSHOT'
-    spark_v = _CONFIG['spark_version']
-    scala_v = _CONFIG['scala_version']
-    jar_url = url + base_name + \
-        '-{}-spark{}-{}.jar'.format(version, spark_v, scala_v)
-    jar_name = '{}-{}.jar'.format(base_name, version)
-    return {base_name: [jar_url, jar_name]}
-
-
-def _validate_jars(jars):
-    installed_jars = get_jars()
-    for k, v in jars.items():
-        found = False
-        for j in installed_jars:
-            if j.startswith(k):
-                found = True
-                break
-        if not found:
-            print('pydl4j: Required jar not installed {}.'.format(v[1]))
-            config = get_config()
-            if config['nd4j_backend'] == 'cpu' and config['dl4j_version'] == '1.0.0-SNAPSHOT':
-                install_docker_jars()
-                # install(v[0], v[1])  # Disabled for now. Issues with spark.
-            else:
-                install_docker_jars()
-
-
-def _install_jars(jars):  # Note: downloads even if already installed.
-    for v in jars.values():
-        install(v[0], v[1])
-
-
-def install_nd4j_jars():
-    _install_jars(_nd4j_jars)
+            maven_build()
 
 
 def validate_nd4j_jars():
-    _validate_jars(_nd4j_jars())
-
-
-def install_datavec_jars():
-    _install_jars(_datavec_jars())
+    validate_jars()
 
 
 def validate_datavec_jars():
@@ -361,7 +325,7 @@ def validate_datavec_jars():
         _write_config()
         context = _get_context_from_config()
         set_context(context)
-    _validate_jars(_datavec_jars())
+    validate_jars()
 
 
 def _get_all_contexts():
