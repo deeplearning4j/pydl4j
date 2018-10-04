@@ -334,7 +334,7 @@ def _get_all_contexts():
 def set_jnius_config():
     try:
         import jnius_config
-        jnius_config.set_classpath(os.path.join(get_dir(), '*'))
+        jnius_config.add_classpath(os.path.join(get_dir(), '*'))
     # Further options can be set by individual projects
     except ImportError:
         warnings.warn('Pyjnius not installed.')
