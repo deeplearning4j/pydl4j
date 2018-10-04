@@ -28,8 +28,9 @@ import click
 from click.exceptions import ClickException
 from dateutil import parser
 
-from .pydl4j import set_config, get_config, install_from_docker
-from .pydl4j import validate_config
+from .pydl4j import set_config, get_config
+from .pydl4j import validate_config, is_docker_available
+from .pydl4j import _maven_build
 
 
 if sys.version_info[0] == 2:
@@ -165,14 +166,21 @@ class CLI(object):
         set_config(cli_out)
 
     def install(self):
-        # TODO: optionally download uberjars
-        check_docker()
+        if is_docker_available():
+            click.echo(click.style(
+                "Docker is running, starting installation.", fg="green", bold=True))
+            click.echo(click.style("========\n\nNote that this might take some time to complete.\n" +
+                                   "We will first pull a docker container with Maven, then install all dependencies selected with 'pydl4j init'.\n" +
+                                   "After completion you can start using DL4J from Python.\n\n========", fg="green", bold=False))
+            _maven_build(use_docker=True)
+        else:
+            click.echo(
+                "" + click.style("Could not detect docker on your system.", fg="red", bold=True))
+            click.echo(click.style("========\n\nNote that this might take some time to complete.\n" +
+                                   "We will first pull a docker container with Maven, then install all dependencies selected with 'pydl4j init'.\n" +
+                                   "After completion you can start using DL4J from Python.\n\n========", fg="green", bold=False))
 
-        click.echo(click.style("========\n\nNote that this might take some time to complete.\n" +
-                               "We will first pull a docker container with Maven, then install all dependencies selected with 'pydl4j init'.\n" +
-                               "After completion you can start using DL4J from Python.\n\n========", fg="green", bold=False))
-
-        install_from_docker()
+            _maven_build(use_docker=False)
 
 
 def handle():
@@ -185,18 +193,6 @@ def handle():
         click.echo(click.style("Error: ", fg='red', bold=True))
         traceback.print_exc()
         sys.exit()
-
-
-def check_docker():
-    devnull = open(os.devnull, 'w')
-    try:
-        subprocess.call(["docker", "--help"], stdout=devnull, stderr=devnull)
-        click.echo(click.style(
-            "Docker is running, starting installation.", fg="green", bold=True))
-    except:
-        click.echo(
-            "" + click.style("Could not detect docker on your system. Make sure a docker deamon is running", fg="red", bold=True))
-        raise Exception("Aborting installation, docker not found.")
 
 
 if __name__ == '__main__':
