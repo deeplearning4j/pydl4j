@@ -228,7 +228,7 @@ def docker_build():
 def docker_run():
     create_pom_from_config()
     py_call(["sudo", "docker", "run", "--mount", "src=" +
-          _MY_DIR + ",target=/app,type=bind", "pydl4j"])
+            _MY_DIR + ",target=/app,type=bind", "pydl4j"])
     # docker will build into <context>/target, need to move to context dir
     context_dir = get_dir()
     config = get_config()
@@ -251,7 +251,7 @@ def is_docker_available():
     try:
         py_call(["docker", "--help"], stdout=devnull, stderr=devnull)
         return True
-    except:
+    except Exception:
         return False
 
 
@@ -285,17 +285,15 @@ def maven_build():
         warnings.warn("Docker unavailable. Attempting alternate implementation.")
         _maven_build(use_docker=False)
 
-      
-
 
 def validate_jars():
-    # builds jar if not available for given context 
+    # builds jar if not available for given context
     jars = get_jars()
     dl4j_version = _CONFIG['dl4j_version']
     jar = "pydl4j-{}-bin.jar".format(dl4j_version)
     if jar not in jars:
         # jar not found
-        # but its possible a jar exists in a different 
+        # but its possible a jar exists in a different
         # context. If that context is a "super set" of
         # of the current one, we can use its jar!
         original_context = context()
