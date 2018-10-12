@@ -31,7 +31,7 @@ def call(arglist):
             arglist.pop(0)
     error = py_call(arglist)
     if error:
-        raise Exception('Subprocess error for command : ' + arglist)
+        raise Exception('Subprocess error for command: ' + list(arglist))
 
 
 _CONFIG_FILE = os.path.join(_MY_DIR, 'config.json')
