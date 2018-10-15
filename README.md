@@ -14,6 +14,8 @@ can use PyDL4J for the following tasks:
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/deeplearning4j/pydl4j/blob/master/LICENSE)
 [![PyPI version](https://badge.fury.io/py/pydl4j.svg)](https://badge.fury.io/py/pydl4j)
 
+![PyDL4J](https://github.com/deeplearning4j/pydl4j/blob/master/python_in_java.png)
+
 ## Installation
 
 PyDL4J is on PyPI, so you can install it with `pip`:
