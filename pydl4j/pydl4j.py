@@ -26,9 +26,6 @@ import json
 
 
 def call(arglist):
-    if os.name == 'nt':
-        if arglist[0] == 'sudo':
-            arglist.pop(0)
     error = py_call(arglist)
     if error:
         raise Exception('Subprocess error for command : ' + arglist)
@@ -222,12 +219,12 @@ def docker_build():
     with open(docker_path, 'w') as f:
         f.write(docker_string)
 
-    call(["sudo", "docker", "build", _MY_DIR, "-t", "pydl4j"])
+    call(["docker", "build", _MY_DIR, "-t", "pydl4j"])
 
 
 def docker_run():
     create_pom_from_config()
-    py_call(["sudo", "docker", "run", "--mount", "src=" +
+    py_call(["docker", "run", "--mount", "src=" +
             _MY_DIR + ",target=/app,type=bind", "pydl4j"])
     # docker will build into <context>/target, need to move to context dir
     context_dir = get_dir()
@@ -240,10 +237,8 @@ def docker_run():
     _write_config(os.path.join(context_dir, 'config.json'))
 
     # os.rename or shutil won't work in all cases, need to assume sudo role
-    if os.name == 'nt':
-        os.rename(source, target)
-    else:
-        call(["sudo", "mv", source, target])
+    os.rename(source, target)
+
 
 
 def is_docker_available():
