@@ -42,7 +42,8 @@ _CONFIG = {
     'spark': True,
     'spark_version': '2',
     'scala_version': '2.11',
-    'nd4j_backend': 'cpu'
+    'nd4j_backend': 'cpu',
+    'validate_jars': True
 }
 
 
@@ -77,7 +78,7 @@ def _write_config(filepath=None):
 
 if os.path.isfile(_CONFIG_FILE):
     with open(_CONFIG_FILE, 'r') as f:
-        _CONFIG = json.load(f)
+        _CONFIG.update(json.load(f))
 else:
     _write_config()
 
@@ -282,6 +283,8 @@ def maven_build():
 
 
 def validate_jars():
+    if not _CONFIG['validate_jars']:
+        return
     # builds jar if not available for given context
     jars = get_jars()
     dl4j_version = _CONFIG['dl4j_version']
