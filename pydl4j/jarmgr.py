@@ -99,7 +99,13 @@ def context():
 
 @check
 def get_dir():
-    return _CONTEXT_DIR
+    path = os.environ.get('PYDL4J_CLASS_PATH')
+    if path is None:
+        # For backward compatibility
+        path = os.environ.get('JUMPY_CLASS_PATH')
+    if path is None:
+        return _CONTEXT_DIR
+    return path
 
 
 @check
