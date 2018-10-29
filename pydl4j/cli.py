@@ -170,19 +170,19 @@ class CLI(object):
             use_docker = input("Docker available on your system. Would you like to use docker for installation> (default 'y')[y/n]: ") or 'yes'
             if to_bool(use_docker):
                 click.echo(click.style(
-                    "Docker is running, starting installation.", fg="green", bold=True))
+                                       "Docker is running, starting installation.", fg="green", bold=True))
                 click.echo(click.style("========\n\nNote that this might take some time to complete.\n" +
-                                    "We will first pull a docker container with Maven, then install all dependencies selected with 'pydl4j init'.\n" +
-                                    "After completion you can start using DL4J from Python.\n\n========", fg="green", bold=False))
+                                       "We will first pull a docker container with Maven, then install all dependencies selected with 'pydl4j init'.\n" +
+                                       "After completion you can start using DL4J from Python.\n\n========", fg="green", bold=False))
                 _maven_build(use_docker=True)
             else:
                 click.echo(click.style("========\n\nNote that this might take some time to complete.\n" +
-                                    "After completion you can start using DL4J from Python.\n\n========", fg="green", bold=False))
+                                       "After completion you can start using DL4J from Python.\n\n========", fg="green", bold=False))
 
                 _maven_build(use_docker=False)
         else:
             click.echo(
-                "" + click.style("Could not detect docker on your system.", fg="red", bold=True))
+                       "" + click.style("Could not detect docker on your system.", fg="red", bold=True))
             click.echo(click.style("========\n\nNote that this might take some time to complete.\n" +
                                    "After completion you can start using DL4J from Python.\n\n========", fg="green", bold=False))
 

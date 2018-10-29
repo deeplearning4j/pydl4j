@@ -241,7 +241,6 @@ def docker_run():
     os.rename(source, target)
 
 
-
 def is_docker_available():
     devnull = open(os.devnull, 'w')
     try:
