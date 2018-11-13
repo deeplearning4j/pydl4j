@@ -236,8 +236,6 @@ def docker_run():
     source = os.path.join(base_target_dir, jar_name)
     target = os.path.join(context_dir, jar_name)
     _write_config(os.path.join(context_dir, 'config.json'))
-
-    # os.rename or shutil won't work in all cases, need to assume sudo role
     os.rename(source, target)
 
 
@@ -258,18 +256,12 @@ def _maven_build(use_docker):
         create_pom_from_config()
         pom_xml = os.path.join(_MY_DIR, 'pom.xml')
         command = 'mvn clean install -f ' + pom_xml
-        if os.name != 'nt':
-            command = 'sudo ' + command
         os.system(command)
         version = _CONFIG['dl4j_version']
         jar_name = "pydl4j-{}-bin.jar".format(version)
         source = os.path.join(_MY_DIR, 'target', jar_name)
         target = os.path.join(get_dir(), jar_name)
-        # os.rename or shutil won't work in all cases, need to assume sudo role
-        if os.name == 'nt':
-            os.rename(source, target)
-        else:
-            call(["sudo", "mv", source, target])
+        os.rename(source, target)
 
 
 def maven_build():
