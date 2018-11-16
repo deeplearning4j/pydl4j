@@ -226,7 +226,7 @@ def docker_build():
 def docker_run():
     create_pom_from_config()
     py_call(["docker", "run", "--mount", "src=" +
-            _MY_DIR + ",target=/app,type=bind", "pydl4j"])
+             _MY_DIR + ",target=/app,type=bind", "pydl4j"])
     # docker will build into <context>/target, need to move to context dir
     context_dir = get_dir()
     config = get_config()
@@ -269,7 +269,8 @@ def maven_build():
         print("Docker available. Starting build...")
         _maven_build(use_docker=True)
     else:
-        warnings.warn("Docker unavailable. Attempting alternate implementation.")
+        warnings.warn(
+            "Docker unavailable. Attempting alternate implementation.")
         _maven_build(use_docker=False)
 
 

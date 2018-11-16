@@ -32,9 +32,12 @@ def test_spark():
     SparkConf = autoclass('org.apache.spark.SparkConf')
     SparkContext = autoclass('org.apache.spark.api.java.JavaSparkContext')
     JavaRDD = autoclass('org.apache.spark.api.java.JavaRDD')
-    SparkTransformExecutor = autoclass('org.datavec.spark.transform.SparkTransformExecutor')
-    StringToWritablesFunction = autoclass('org.datavec.spark.transform.misc.StringToWritablesFunction')
-    WritablesToStringFunction = autoclass('org.datavec.spark.transform.misc.WritablesToStringFunction')
+    SparkTransformExecutor = autoclass(
+        'org.datavec.spark.transform.SparkTransformExecutor')
+    StringToWritablesFunction = autoclass(
+        'org.datavec.spark.transform.misc.StringToWritablesFunction')
+    WritablesToStringFunction = autoclass(
+        'org.datavec.spark.transform.misc.WritablesToStringFunction')
 
     spark_conf = SparkConf()
     spark_conf.setMaster('local[*]')

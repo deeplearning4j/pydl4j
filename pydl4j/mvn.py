@@ -37,7 +37,8 @@ def _parse_contents(text):
     _ = contents.pop(0)
     link_to_parent = contents.pop(0)
     contents = list(map(lambda x: x.split('"')[0], contents))
-    contents = [c[:-1] for c in contents if c[-1] == '/']  # removes meta data files
+    contents = [c[:-1]
+                for c in contents if c[-1] == '/']  # removes meta data files
     return contents
 
 
