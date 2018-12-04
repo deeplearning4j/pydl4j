@@ -3,7 +3,7 @@ from setuptools import find_packages
 
 setup(
     name='pydl4j',
-    version='0.1.3',
+    version='0.1.4',
     packages=find_packages(),
     install_requires=['Cython', 'jnius', 'requests',
                       'click', 'argcomplete', 'python-dateutil'],
