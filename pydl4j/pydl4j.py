@@ -236,7 +236,7 @@ def docker_run():
     source = os.path.join(base_target_dir, jar_name)
     target = os.path.join(context_dir, jar_name)
     _write_config(os.path.join(context_dir, 'config.json'))
-    os.rename(source, target)
+    call(["cp", source, target])
 
 
 def is_docker_available():
